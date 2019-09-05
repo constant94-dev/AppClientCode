@@ -5,6 +5,14 @@
     <!-- 인터넷 권한 -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- camera, gallery 권한 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera2" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -12,6 +20,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <!-- 사진 촬영을 위한 provide -->
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="{package name}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
         <activity
             android:name=".Activity.SplashActivity"
             android:theme="@style/Splash">
@@ -26,8 +47,9 @@
         <activity android:name=".Activity.MainActivity"></activity>
         <activity android:name=".Activity.MailAuthActivity"></activity>
         <activity android:name=".Activity.ReviewRegistActivity"></activity>
-        <activity android:name="com.yongbeom.aircalendar.AirCalendarDatePickerActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"></activity>
+        <activity android:name=".Activity.ReviewDetailActivity"></activity>
+        <activity android:name=".Activity.ReviewModifyActivity"></activity>
+
     </application>
 
 </manifest>

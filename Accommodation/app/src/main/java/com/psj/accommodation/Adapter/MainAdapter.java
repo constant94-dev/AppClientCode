@@ -37,6 +37,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 		mainData = mainDataSet;
 	}
 
+	// 리사이클러뷰 행을 표시하는데 사용되는 레이아웃 xml을 가져오는 역할
 	@Override
 	public MainAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
 		// create a new view
@@ -47,6 +48,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 		return viewholder;
 	}
 
+	// 리사이클러뷰 행에 보여질 ImageView 와 TextView 등을 설정
 	@Override
 	public void onBindViewHolder(@NonNull MainAdapter.ViewHolder viewHolder, int position) {
 		// get element from your dataset at this position
@@ -58,6 +60,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 
 	}
 
+	// 리사이클러뷰 보여줄 행 개수 리턴
 	@Override
 	public int getItemCount() {
 		return mainData.size();

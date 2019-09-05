@@ -33,4 +33,8 @@ public interface ApiService {
 	@POST("/signUp.php")
 	Call<String> signUpUser(@Field("userEmail") String userEmail, @Field("userPassword") String userPassword, @Field("userName") String userName);
 
+	@FormUrlEncoded
+	@POST("/reviewInsert.php")
+	Call<String> reviewAdd(@Field("placeImage") String placeImage, @Field("placeName") String placeName, @Field("timeChoice") String timeChoice, @Field("placeScore") String placeScore);
+
 } // ApiService 인터페이스 끝

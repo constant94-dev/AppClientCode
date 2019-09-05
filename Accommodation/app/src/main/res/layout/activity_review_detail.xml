@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:orientation="vertical"
-    android:weightSum="1">
+    android:background="#FFFAFA">
 
     <LinearLayout
         android:id="@+id/LinearFirst"
@@ -13,17 +13,17 @@
         android:layout_weight="0.05"
         android:background="@color/colorBlue"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:padding="10dp"
-            android:text="리뷰등록"
+            android:text="리뷰수정"
             android:textColor="@color/colorWhite"
             android:textSize="30sp" />
-
 
     </LinearLayout>
 
@@ -31,20 +31,20 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.9">
+        app:layout_constraintTop_toBottomOf="@+id/LinearFirst">
 
         <ImageView
-            android:id="@+id/PlaceImage"
+            android:id="@+id/ModifyImage"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="50dp"
-            android:src="@drawable/add_photo_black"
+            android:src="@drawable/ic_launcher_foreground"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/PlaceText"
+            android:id="@+id/ModifyText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
@@ -53,21 +53,21 @@
             android:textColor="@color/colorBlack"
             android:textSize="20sp"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/PlaceImage" />
+            app:layout_constraintTop_toBottomOf="@+id/ModifyImage" />
 
         <EditText
-            android:id="@+id/PlaceName"
+            android:id="@+id/ModifyPlace"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
             android:layout_marginTop="40dp"
             android:hint="이름"
             android:textSize="20sp"
-            app:layout_constraintLeft_toRightOf="@+id/PlaceText"
-            app:layout_constraintTop_toBottomOf="@+id/PlaceImage" />
+            app:layout_constraintLeft_toRightOf="@+id/ModifyText"
+            app:layout_constraintTop_toBottomOf="@+id/ModifyImage" />
 
         <TextView
-            android:id="@+id/TimeText"
+            android:id="@+id/ModifyTimeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
@@ -76,21 +76,21 @@
             android:textColor="@color/colorBlack"
             android:textSize="20sp"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/PlaceText" />
+            app:layout_constraintTop_toBottomOf="@+id/ModifyText" />
 
         <TextView
-            android:id="@+id/TimeChoice"
+            android:id="@+id/ModifyTimeChoice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
             android:layout_marginTop="20dp"
             android:hint="기간 선택"
             android:textSize="20sp"
-            app:layout_constraintLeft_toRightOf="@+id/TimeText"
-            app:layout_constraintTop_toBottomOf="@+id/PlaceText" />
+            app:layout_constraintLeft_toRightOf="@+id/ModifyTimeText"
+            app:layout_constraintTop_toBottomOf="@+id/ModifyText" />
 
         <TextView
-            android:id="@+id/ScoreText"
+            android:id="@+id/ModifyScoreText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="30dp"
@@ -99,51 +99,47 @@
             android:textColor="@color/colorBlack"
             android:textSize="20sp"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/TimeText" />
+            app:layout_constraintTop_toBottomOf="@+id/ModifyTimeText" />
 
         <RatingBar
-            android:id="@+id/PlaceScore"
+            android:id="@+id/ModifyRating"
             style="?android:attr/ratingBarStyleIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
-            android:isIndicator="false"
             android:numStars="5"
-            android:rating="0"
-            android:stepSize="0.5"
-            app:layout_constraintLeft_toRightOf="@+id/ScoreText"
-            app:layout_constraintTop_toBottomOf="@+id/TimeText" />
+            app:layout_constraintLeft_toRightOf="@+id/ModifyScoreText"
+            app:layout_constraintTop_toBottomOf="@+id/ModifyTimeText" />
 
         <Button
-            android:id="@+id/ReviewOK"
+            android:id="@+id/ModifyOK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:layout_marginRight="20dp"
-            android:text="등록하기"
-            app:layout_constraintRight_toLeftOf="@+id/ReviewCancel"
-            app:layout_constraintTop_toBottomOf="@+id/ScoreText" />
+            android:text="수정완료"
+            app:layout_constraintRight_toLeftOf="@+id/ModifyCancel"
+            app:layout_constraintTop_toBottomOf="@+id/ModifyScoreText" />
 
         <Button
-            android:id="@+id/ReviewCancel"
+            android:id="@+id/ModifyCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:layout_marginRight="20dp"
-            android:text="등록취소"
+            android:text="수정취소"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ScoreText" />
+            app:layout_constraintTop_toBottomOf="@+id/ModifyScoreText" />
 
     </android.support.constraint.ConstraintLayout>
-
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.05"
         android:background="@color/colorWhite"
         android:orientation="horizontal"
-        android:weightSum="1">
+        android:weightSum="1"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageView
             android:id="@+id/Home"
@@ -181,4 +177,4 @@
     </LinearLayout>
 
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>
