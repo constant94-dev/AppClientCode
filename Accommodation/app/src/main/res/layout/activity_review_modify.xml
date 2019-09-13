@@ -10,132 +10,135 @@
         android:id="@+id/LinearFirst"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="0.05"
         android:background="@color/colorBlue"
-        android:gravity="right"
+        android:gravity="center"
         android:orientation="horizontal"
-        android:weightSum="1"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:gravity="right"
+            android:gravity="center"
             android:padding="10dp"
-            android:text="상세리뷰"
+            android:text="리뷰수정"
             android:textColor="@color/colorWhite"
             android:textSize="30sp" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="0.2"
-            android:src="@drawable/edit_black" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="0.2"
-            android:src="@drawable/share_black" />
-
-
     </LinearLayout>
 
-    <android.support.constraint.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/ConstraintFirst"
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/LinearFirst">
 
         <ImageView
-            android:id="@+id/DetailImage"
-            android:layout_width="match_parent"
-            android:layout_height="350dp"
-            android:src="@drawable/ramadahotel"
+            android:id="@+id/ModifyImage"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="50dp"
+            android:src="@drawable/ic_launcher_foreground"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/DetailNameText"
+            android:id="@+id/ModifyText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
-            android:layout_marginTop="20dp"
-            android:text="라마다 호텔"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="50dp"
+            android:text="숙박한 장소"
             android:textColor="@color/colorBlack"
             android:textSize="20sp"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/DetailImage" />
+            app:layout_constraintTop_toBottomOf="@+id/ModifyImage" />
+
+        <EditText
+            android:id="@+id/ModifyPlace"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="40dp"
+            android:hint="이름"
+            android:textSize="20sp"
+            app:layout_constraintLeft_toRightOf="@+id/ModifyText"
+            app:layout_constraintTop_toBottomOf="@+id/ModifyImage" />
 
         <TextView
-            android:id="@+id/DetailTime"
+            android:id="@+id/ModifyTimeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
+            android:layout_marginLeft="30dp"
             android:layout_marginTop="20dp"
-            android:text="2019.08.01 ~ 2019.08.02"
+            android:text="숙박한 기간"
             android:textColor="@color/colorBlack"
             android:textSize="20sp"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/DetailNameText" />
+            app:layout_constraintTop_toBottomOf="@+id/ModifyText" />
 
         <TextView
-            android:id="@+id/DetailScoreText"
+            android:id="@+id/ModifyTimeChoice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
+            android:layout_marginLeft="30dp"
             android:layout_marginTop="20dp"
-            android:text="평점"
+            android:hint="기간 선택"
+            android:textSize="20sp"
+            app:layout_constraintLeft_toRightOf="@+id/ModifyTimeText"
+            app:layout_constraintTop_toBottomOf="@+id/ModifyText" />
+
+        <TextView
+            android:id="@+id/ModifyScoreText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:layout_marginLeft="30dp"
+            android:text="숙박한 곳 평점"
             android:textColor="@color/colorBlack"
             android:textSize="20sp"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/DetailTime" />
+            app:layout_constraintTop_toBottomOf="@+id/ModifyTimeText" />
 
-        <TextView
-            android:id="@+id/DetailScore"
+        <RatingBar
+            android:id="@+id/ModifyRating"
+            style="?android:attr/ratingBarStyleIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"
-            android:text="4"
-            android:textColor="@color/colorBlue"
-            android:textSize="20sp"
-            app:layout_constraintLeft_toRightOf="@+id/DetailScoreText"
-            app:layout_constraintTop_toBottomOf="@+id/DetailTime" />
+            android:layout_margin="20dp"
+            android:numStars="5"
+            app:layout_constraintLeft_toRightOf="@+id/ModifyScoreText"
+            app:layout_constraintTop_toBottomOf="@+id/ModifyTimeText" />
 
-        <TextView
-            android:id="@+id/DetailCommentText"
+        <Button
+            android:id="@+id/ModifyOK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
-            android:layout_marginTop="20dp"
-            android:text="댓글"
-            android:textColor="@color/colorBlack"
-            android:textSize="20sp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/DetailScoreText" />
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="20dp"
+            android:text="수정완료"
+            app:layout_constraintRight_toLeftOf="@+id/ModifyCancel"
+            app:layout_constraintTop_toBottomOf="@+id/ModifyScoreText" />
 
-        <TextView
-            android:id="@+id/DetailComment"
+        <Button
+            android:id="@+id/ModifyCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"
-            android:text="23"
-            android:textColor="@color/colorBlue"
-            android:textSize="20sp"
-            app:layout_constraintLeft_toRightOf="@+id/DetailCommentText"
-            app:layout_constraintTop_toBottomOf="@+id/DetailScoreText" />
+            android:layout_marginTop="30dp"
+            android:layout_marginRight="20dp"
+            android:text="수정취소"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ModifyScoreText" />
 
     </android.support.constraint.ConstraintLayout>
 
     <LinearLayout
-        android:id="@+id/LinearSecond"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorWhite"
         android:orientation="horizontal"
+        android:padding="10dp"
         android:weightSum="1"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -173,22 +176,6 @@
 
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/DetailCommentBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="10dp"
-        android:text="댓글달기"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ConstraintFirst" />
-
-    <android.support.v7.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/DetailCommentBtn">
-
-    </android.support.v7.widget.RecyclerView>
 
 
 </android.support.constraint.ConstraintLayout>

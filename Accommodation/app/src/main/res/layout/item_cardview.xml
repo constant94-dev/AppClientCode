@@ -50,19 +50,29 @@
                     android:layout_marginTop="10dp"
                     android:text="날짜 2019.08.01 ~ 2019.08.03" />
 
+                <RatingBar
+                    android:id="@+id/ReviewScore"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:numStars="5"
+                    android:stepSize="0.5" />
+
                 <TextView
-                    android:id="@+id/InfoScore"
+                    android:id="@+id/InfoWriterText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="(평점)" />
+                    android:text="작성자" />
 
-                <RatingBar
-                    android:id="@+id/ReviewRatingBar"
-                    style="?android:attr/ratingBarStyleIndicator"
-                    android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/InfoWriter"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:numStars="5" />
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="" />
 
             </LinearLayout>
 

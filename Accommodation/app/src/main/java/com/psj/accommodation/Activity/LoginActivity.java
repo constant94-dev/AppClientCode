@@ -2,6 +2,7 @@ package com.psj.accommodation.Activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -27,6 +28,8 @@ public class LoginActivity extends AppCompatActivity {
 	EditText LoginEmail, LoginPassword;
 	Button LoginBtn, JoinBtn;
 	AlertDialog alertDialog;
+
+	String loginName = "";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,17 +69,30 @@ public class LoginActivity extends AppCompatActivity {
 					public void onResponse(Call<String> call, Response<String> response) {
 
 						Toast.makeText(LoginActivity.this, "서버에서 받은 응답 값 : " + response.body().toString(), Toast.LENGTH_LONG).show();
+						String loginNameLast = "";
 
-						if (response.body().equals("계정있어!")) {
+						// 쉐어드에 사용자이름을 저장하기 위한 사전 작업
+						if (response.body().length() > 0) {
+							int loginNameLength = response.body().length();
+							Log.i("응답받은 문자열 전체 길이 : ", "" + loginNameLength);
+							loginNameLast = response.body().substring(loginNameLength - 1, loginNameLength);
+							Log.i("분리한 문자열 마지막 1자리 : ", "" + loginNameLast);
+							loginName = response.body().substring(0, loginNameLength - 1);
+							Log.i("분리한 문자열 이름 : ", "" + loginName);
+
+						}
+
+						if (loginNameLast.equals("1")) {
+							saveShard();
 							successLogin();
-						} else if (response.body().equals("계정없어!")) {
-							failEmail();
 						} else if (response.body().equals("비밀번호없어!")) {
 							failPassword();
 						} else if (response.body().equals("POST값없어!")) {
 							noData();
 						} else if (response.body().equals("SQL값없어!")) {
 							noUser();
+						} else {
+							failEmail();
 						}
 
 					}
@@ -195,6 +211,18 @@ public class LoginActivity extends AppCompatActivity {
 		alertDialog = builder.create();
 
 		alertDialog.show();
+	}
+
+	// 쉐어드 저장해서 세션처럼 활용하기 위한 기능
+	public void saveShard() {
+		// 쉐어드 sessionName 이름, 기본모드로 설정
+		SharedPreferences sharedPreferences = getSharedPreferences("sessionName", MODE_PRIVATE);
+		// editor 이용 값을 쉐어드에 저장
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		// key, value 형태로 저장
+		// loginName (사용자가 입력한 저장할 데이터)
+		editor.putString("name", loginName);
+		editor.commit();
 	}
 
 

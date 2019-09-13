@@ -182,11 +182,6 @@ public class JoinActivity extends AppCompatActivity {
 								noData();
 							}
 
-							// EditText 값 초기화
-							UserName.setText("");
-							UserEmail.setText("");
-							UserPassword.setText("");
-
 						} // onResponse() 끝
 
 						// 응답 실패 (네트워크 오류가 발생했을 때 등)

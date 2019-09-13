@@ -1,6 +1,7 @@
 package com.psj.accommodation.Activity;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,11 +19,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.gson.JsonObject;
 import com.psj.accommodation.Adapter.MainAdapter;
 import com.psj.accommodation.Data.MainItem;
+import com.psj.accommodation.Data.Review;
+import com.psj.accommodation.Data.ReviewSelect;
+import com.psj.accommodation.Interface.ApiService;
 import com.psj.accommodation.R;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 // TODO 로그인 후 보여지는 메인 화면
@@ -36,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
 	private RecyclerView mainRecyclerView;
 	private RecyclerView.Adapter mainAdapter;
 	private RecyclerView.LayoutManager mainLayoutManager;
+	private String mainJsonString;
+
 
 	TextView reviewRegister;
 
@@ -50,6 +65,22 @@ public class MainActivity extends AppCompatActivity {
 		reviewRegister = findViewById(R.id.ReviewRegisterText);
 
 		Log.i(TAG, "onCreate : 실행");
+
+		// ArrayList 객체 생성
+		mainItemList = new ArrayList<>();
+
+		mainRecyclerView = findViewById(R.id.main_recycler_view);
+		mainRecyclerView.setHasFixedSize(true); // 옵션
+
+		// Linear layout manager 사용
+		mainLayoutManager = new LinearLayoutManager(this);
+		mainRecyclerView.setLayoutManager(mainLayoutManager);
+
+		// Adapter 셋팅
+		mainAdapter = new MainAdapter(getApplicationContext(), mainItemList);
+		mainRecyclerView.setAdapter(mainAdapter);
+
+		getReviewData();
 
 		// 안드로이드 SDK 버전 23 이상이라면 권한 요청해야됨
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -76,33 +107,52 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 
-		// 데이터준비 실제로는 ArrayList<>등을 사용해야 할듯 하다.
-		// DB에서 아이템을 가져와 배열에 담아 주면 된다.
+		// 데이터 수신
+		Bundle getRegister = getIntent().getExtras();
 
-		// ArrayList 객체 생성
-		mainItemList = new ArrayList<>();
-		// ArrayList 값 추가
-		mainItemList.add(new MainItem("라마다호텔", "2019-08-01 ~ 2019-08-03", "4.5"));
-		mainItemList.add(new MainItem("신라호텔", "2019-08-01 ~ 2019-08-03", "5.0"));
-		mainItemList.add(new MainItem("부산여관", "2019-08-01 ~ 2019-08-03", "4.0"));
+		// 인텐트 데이터 수신 조건 시작
+		if (getRegister == null) {
+			Log.i(TAG, "데이터 수신 할거 없음");
+		} else {
 
-		mainRecyclerView = findViewById(R.id.main_recycler_view);
-		mainRecyclerView.setHasFixedSize(true); // 옵션
+			Log.i(TAG, "데이터 수신 할거 있음");
 
-		// Linear layout manager 사용
-		mainLayoutManager = new LinearLayoutManager(this);
-		mainRecyclerView.setLayoutManager(mainLayoutManager);
+			// String, float 형태 값 가져오기
+			String PlaceNum = getRegister.getString("PlaceNum");
+			String PlaceTime = getRegister.getString("PlaceTime");
+			String PlaceName = getRegister.getString("PlaceName");
+			float PlaceScore = getRegister.getFloat("PlaceScore");
+			String Writer = getRegister.getString("Writer");
 
-		// Adapter 셋팅
-		mainAdapter = new MainAdapter(mainItemList);
-		mainRecyclerView.setAdapter(mainAdapter);
+			// 데이터준비 실제로는 ArrayList<>등을 사용해야 할듯 하다.
+			// DB에서 아이템을 가져와 배열에 담아 주면 된다.
 
+			// 첫번째 줄에 삽입됨
+			// 0을 빼고 notifyItemInserted 0 만 해주어도 리사이클러뷰 맨위에 삽입 된다
+			mainItemList.add(0, new MainItem(PlaceNum, PlaceName, PlaceTime, PlaceScore, "image", Writer));
+
+			mainAdapter.notifyItemInserted(0);
+
+
+		} // 인텐트 데이터 수신 조건 끝
 
 	} // onCreate() 끝
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+
+		Log.i(TAG, "onStart : 실행");
+
+
+	}
+
+	@Override
 	protected void onResume() {
 		super.onResume();
+
+		Log.i(TAG, "onResume : 실행");
+
 
 		// 등록 눌렀을 때
 		reviewRegister.setOnClickListener(new View.OnClickListener() {
@@ -197,5 +247,85 @@ public class MainActivity extends AppCompatActivity {
 		});
 		builder.create().show();
 	} // showDialogForPermission() 끝
+
+	// 레트로핏 사용하여 데이터베이스 데이터 가져오기
+	public void getReviewData() {
+		// 레트로핏 서버 URL 설정해놓은 객체 생성
+		RetroClient retroClient = new RetroClient();
+		// GET, POST 같은 서버에 데이터를 보내기 위해서 생성합니다
+		ApiService apiService = retroClient.getApiClient().create(ApiService.class);
+
+		// 인터페이스 ApiService에 선언한 reviewSelect()를 호출합니다
+		Call<JsonObject> call = apiService.reviewSelect();
+
+		call.enqueue(new Callback<JsonObject>() {
+			@Override
+			public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+				Log.i(TAG, "onResponse : 실행");
+				Log.i(TAG, "서버에서 응답 받은 값 : " + response.body().toString());
+
+				// 리스트를 초기화 시킨다
+				mainItemList.clear();
+				// 어댑터에게 데이터 세팅이 변경되었다고 알려준다
+				mainAdapter.notifyDataSetChanged();
+
+				mainJsonString = response.body().toString();
+				showResult();
+			}
+
+			@Override
+			public void onFailure(Call<JsonObject> call, Throwable throwable) {
+				Log.i("onFailure", "" + throwable);
+				Toast.makeText(MainActivity.this, "onFailure / " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		});
+
+
+	} // getReviewData() 끝
+
+
+	// 서버에서 json 형태로 가져온 값을 리사이클러뷰에 추가 시키는 방법
+	private void showResult() {
+
+		String TAG_JSON = "review";
+		String TAG_NUM = "num";
+		String TAG_NAME = "name";
+		String TAG_TIME = "time";
+		String TAG_SCORE = "score";
+		String TAG_WRITER = "writer";
+		String TAG_IMAGE = "image";
+
+
+		try {
+			// 서버에서 가져온 json 데이터 처음 시작이 '{' 중괄호로 시작해서 JSONObject 에 담아준다
+			JSONObject jsonObject = new JSONObject(mainJsonString);
+			// JSONArray [ 대괄호로 시작하니 jsonObject 에서 get 한 값을 JSONArray 에 담아준다
+			JSONArray jsonArray = jsonObject.getJSONArray(TAG_JSON);
+
+			// 반복문을 이용하여 알맞게 풀어준다
+			for (int i = 0; i < jsonArray.length(); i++) {
+
+				JSONObject item = jsonArray.getJSONObject(i);
+
+				String num = item.getString(TAG_NUM);
+				String name = item.getString(TAG_NAME);
+				String time = item.getString(TAG_TIME);
+				float score = (float) item.getDouble(TAG_SCORE);
+				String writer = item.getString(TAG_WRITER);
+				String image = item.getString(TAG_IMAGE);
+
+				// 어댑터에 전달할 데이터 추가
+				mainItemList.add(0, new MainItem(num, name, time, score, image, writer));
+				// 어댑터에게 새로 삽입된 아이템이 있다는걸 알려준다
+				mainAdapter.notifyItemInserted(0);
+			}
+
+
+		} catch (JSONException e) {
+
+			Log.d(TAG, "showResult : ", e);
+		}
+
+	}
 
 } // MainActivity 클래스 끝

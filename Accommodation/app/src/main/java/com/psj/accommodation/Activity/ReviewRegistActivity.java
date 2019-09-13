@@ -2,48 +2,42 @@ package com.psj.accommodation.Activity;
 
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
-import android.app.Dialog;
+
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
+import android.content.SharedPreferences;
+
+
 import android.os.Bundle;
-import android.os.Environment;
+
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.content.FileProvider;
+
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.OrientationHelper;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
+
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RadioGroup;
+
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.applikeysolutions.cosmocalendar.view.CalendarView;
+import com.psj.accommodation.Data.Review;
 import com.psj.accommodation.Interface.ApiService;
 import com.psj.accommodation.R;
-import com.squareup.picasso.Picasso;
-import com.yongbeom.aircalendar.core.AirCalendarIntent;
+
 
 import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 // TODO 로그인 후 보여지는 메인 화면
@@ -56,7 +50,7 @@ public class ReviewRegistActivity extends AppCompatActivity {
 	// 등록 및 등록취소 버튼
 	Button ReviewOK, ReviewCancel;
 	// 기간선택 텍스트
-	TextView TimeChoice;
+	TextView PlaceTime;
 	// 숙박장소 이름
 	EditText PlaceName;
 	// 평점
@@ -68,12 +62,18 @@ public class ReviewRegistActivity extends AppCompatActivity {
 	private static final int PICK_FROM_ALBUM = 1;
 	// 카메라 사용 후 요청결과 코드
 	private static final int PICK_FROM_CAMERA = 2;
-	// 받아온 이미지 저장 객체
-	private File tempFile;
-	// 캘린더뷰 라이브러리 객체
-	private CalendarView calendarView;
+	// 받아온 이미지 저장 객체 (NullPointerException 방지를 위한 임의 객체 생성)
+	private File tempFile = new File("test");
 	// 다이얼로그 전역변수
 	AlertDialog alertDialog;
+	// 리뷰 데이터 임시저장 객체
+	Review review;
+	// 쉐어드에 저장된 사용자 이름 (세션)
+	String sessionName = "";
+	// 숙박 시작 날짜
+	String selectDateStart = "";
+	// 숙박 끝 날짜
+	String selectDateEnd = "";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -86,10 +86,37 @@ public class ReviewRegistActivity extends AppCompatActivity {
 		MyProfile = findViewById(R.id.MyProfile);
 		ReviewOK = findViewById(R.id.ReviewOK);
 		ReviewCancel = findViewById(R.id.ReviewCancel);
-		TimeChoice = findViewById(R.id.TimeChoice);
+		PlaceTime = findViewById(R.id.PlaceTime);
 		PlaceImage = findViewById(R.id.PlaceImage);
 		PlaceName = findViewById(R.id.PlaceName);
 		PlaceScore = findViewById(R.id.PlaceScore);
+
+		PlaceScore.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+			@Override
+			public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
+				Toast.makeText(ReviewRegistActivity.this, "평점 : " + rating, Toast.LENGTH_SHORT).show();
+			}
+		});
+
+		// 데이터 수신
+		Bundle getCalendar = getIntent().getExtras();
+
+		if (getCalendar == null) {
+			Log.i(TAG, "데이터 수신 할거 없음");
+		} else {
+			// String 형태 값 가져오기
+			selectDateStart = getCalendar.getString("selectDateStart");
+			selectDateEnd = getCalendar.getString("selectDateEnd");
+
+			Log.i(TAG, "숙박 시작 날짜 : " + selectDateStart);
+			Log.i(TAG, "숙박 끝 날짜 : " + selectDateEnd);
+
+			PlaceTime.setText(selectDateStart + " ~ " + selectDateEnd);
+		}
+
+
+		// 세션 값 가져오기 기능
+		getShard();
 
 	}
 
@@ -101,18 +128,20 @@ public class ReviewRegistActivity extends AppCompatActivity {
 		PlaceImage.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				photochoice();
+				photoChoice();
 			}
 		});
 
-		// 숙박 기간 선택 클릭 이벤트
-		TimeChoice.setOnClickListener(new View.OnClickListener() {
+		// 기간 선택 텍스트 클릭 이벤트
+		PlaceTime.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// 달력 다이얼로그를 보여주고 날짜를 범위로 설정할 수 있다
-
+				Intent calendarIntent = new Intent(ReviewRegistActivity.this, CalendarActivity.class);
+				startActivity(calendarIntent);
+				finish();
 			}
 		});
+
 
 		// 하단 홈 클릭 이벤트
 		Home.setOnClickListener(new View.OnClickListener() {
@@ -129,20 +158,72 @@ public class ReviewRegistActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 
-				// 레트로핏 서버 URL 설정해놓은 객체 생성
-				RetroClient retroClient = new RetroClient();
-				// GET, POST 같은 서버에 데이터를 보내기 위해서 생성합니다
-				ApiService apiService = retroClient.getApiClient().create(ApiService.class);
 
-				// 인터페이스 ApiService에 선언한 checkUser()를 호출합니다
-				Call<String> call;
+				Log.i(TAG, "ReviewOK : 실행");
+				Log.i(TAG, "PlaceTime : " + PlaceTime.getText());
+				Log.i(TAG, "PlaceName : " + PlaceName.getText());
+
+				if (PlaceTime.getText().equals("기간선택")) {
+					Log.i(TAG, "PlaceTime2 : " + PlaceTime.getText());
+					Toast.makeText(ReviewRegistActivity.this, "기간을 선택하세요.", Toast.LENGTH_SHORT).show();
+				} else if (PlaceName.getText().length() == 0) {
+
+					Toast.makeText(ReviewRegistActivity.this, "장소명을 입력하세요", Toast.LENGTH_SHORT).show();
+				} else {
+
+					Toast.makeText(ReviewRegistActivity.this, "등록을 시작합니다.", Toast.LENGTH_SHORT).show();
+
+					// 리뷰 임시저장 객체
+					review = new Review();
+
+					review.setPlaceTime(PlaceTime.getText().toString());
+					review.setPlaceName(PlaceName.getText().toString());
+					review.setPlaceScore(PlaceScore.getRating());
+					review.setWriter(sessionName);
+
+					// 레트로핏 서버 URL 설정해놓은 객체 생성
+					RetroClient retroClient = new RetroClient();
+					// GET, POST 같은 서버에 데이터를 보내기 위해서 생성합니다
+					ApiService apiService = retroClient.getApiClient().create(ApiService.class);
+
+					// 인터페이스 ApiService에 선언한 reviewInsert()를 호출합니다
+					Call<String> call = apiService.reviewInsert(review.getPlaceName(), review.getPlaceTime(), review.getPlaceScore(), review.getPlaceImage(), review.getWriter());
+					// onResponse() 메서드를 이용해 응답을 전달받아서 요청에 대한 결과를 받을 수 있습니다
+					call.enqueue(new Callback<String>() {
+						@Override
+						public void onResponse(Call<String> call, Response<String> response) {
+
+							Toast.makeText(ReviewRegistActivity.this, "서버에서 받은 응답 값 : " + response.body(), Toast.LENGTH_LONG).show();
+							Log.i("onResponse", "" + response.body().toString());
+							review.setPlaceNum(response.body().toString());
+
+							if (!response.body().equals("")) {
+
+								Intent MainIntent = new Intent(ReviewRegistActivity.this, MainActivity.class);
+								MainIntent.putExtra("PlaceNum", review.getPlaceNum());
+								MainIntent.putExtra("PlaceTime", review.getPlaceTime());
+								MainIntent.putExtra("PlaceName", review.getPlaceName());
+								MainIntent.putExtra("PlaceScore", review.getPlaceScore());
+								MainIntent.putExtra("Writer", review.getWriter());
+								startActivity(MainIntent);
+								finish();
+							}
 
 
-				Intent MainIntent = new Intent(ReviewRegistActivity.this, MainActivity.class);
-				startActivity(MainIntent);
-				finish();
-			}
-		});
+						}
+
+						// 응답 실패 (네트워크 오류가 발생했을 때 등)
+						@Override
+						public void onFailure(Call<String> call, Throwable throwable) {
+							Log.i("onFailure", "" + throwable);
+							Toast.makeText(ReviewRegistActivity.this, "onFailure / " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+						}
+					}); // enqueue() 끝
+				}
+
+
+			} // onClick() 끝
+		}); // ReviewOK 클릭 이벤트 끝
 
 		// 리뷰 등록취소 클릭 이벤트
 		ReviewCancel.setOnClickListener(new View.OnClickListener() {
@@ -158,7 +239,7 @@ public class ReviewRegistActivity extends AppCompatActivity {
 	} // onResume() 끝
 
 	// 리뷰이미지 클릭 알림 기능
-	public void photochoice() {
+	public void photoChoice() {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(ReviewRegistActivity.this);
 
@@ -184,24 +265,24 @@ public class ReviewRegistActivity extends AppCompatActivity {
 		alertDialog.show();
 	}
 
-	// 카메라에서 찍은 사진을 저장할 파일 만들기
-	public File createImageFile() throws IOException {
-
-		Log.i(TAG, "createImageFile : 실행");
-
-		// 이미지 파일 이름 (review_(시간)_)
-		String timeStamp = new SimpleDateFormat("HHmmss").format(new Date());
-		String imageFileName = "review_" + timeStamp + "_";
-
-		// 이미지가 저장될 폴더 이름 (review)
-		File storageDir = new File(Environment.getExternalStorageDirectory() + "/review/");
-		if (!storageDir.exists()) storageDir.mkdirs();
-
-		// 빈 파일 생성
-		File image = File.createTempFile(imageFileName, ".jpg", storageDir);
-
-		return image;
-	}
+//	// 카메라에서 찍은 사진을 저장할 파일 만들기
+//	public File createImageFile() throws IOException {
+//
+//		Log.i(TAG, "createImageFile : 실행");
+//
+//		// 이미지 파일 이름 (review_(시간)_)
+//		String timeStamp = new SimpleDateFormat("HHmmss").format(new Date());
+//		String imageFileName = "review_" + timeStamp + "_";
+//
+//		// 이미지가 저장될 폴더 이름 (review)
+//		File storageDir = new File(Environment.getExternalStorageDirectory() + "/review/");
+//		if (!storageDir.exists()) storageDir.mkdirs();
+//
+//		// 빈 파일 생성
+//		File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+//
+//		return image;
+//	}
 
 	// 카메라에서 이미지 촬영하기 기능
 	private void takePhoto() {
@@ -210,32 +291,7 @@ public class ReviewRegistActivity extends AppCompatActivity {
 
 		Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-		try {
 
-			tempFile = createImageFile();
-		} catch (IOException e) {
-			Toast.makeText(this, "이미지 처리 오류! 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
-			finish();
-			e.printStackTrace();
-		}
-		if (tempFile != null) {
-			// 안드로이드 OS 누가 버전 이후부터는 file:// URI 의 노출을 금지하고 있습니다.
-			// 만약 URI 를 그냥 사용하게 되면 FileUriExposedException 발생하게 됩니다.
-			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-
-				Uri photoUri = FileProvider.getUriForFile(this,
-						"{package name}.provider", tempFile);
-				intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-				startActivityForResult(intent, PICK_FROM_CAMERA);
-
-			} else {
-
-				Uri photoUri = Uri.fromFile(tempFile);
-				intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
-				startActivityForResult(intent, PICK_FROM_CAMERA);
-
-			}
-		}
 	}
 
 	private void goToAlbum() {
@@ -243,37 +299,9 @@ public class ReviewRegistActivity extends AppCompatActivity {
 		Log.i(TAG, "goToAlbum : 실행");
 
 		Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-		startActivityForResult(intent, PICK_FROM_ALBUM);
+		//startActivityForResult(intent, PICK_FROM_ALBUM);
 	}
 
-	private void setCameraImage() {
-
-		Log.i(TAG, "setCameraImage : 실행");
-
-		Log.i(TAG, "tempFile 절대경로 " + tempFile.getAbsolutePath());
-		Log.i(TAG, "tempFile " + tempFile);
-
-		Picasso.with(this)
-				.load(String.valueOf(tempFile.toURI()))
-				.resize(500, 500)
-				.rotate(90f)
-				.into(PlaceImage);
-
-
-	}
-
-	private void setGallayImage() {
-
-		Log.i(TAG, "setGallayImage : 실행");
-
-		Picasso.with(this) // Input 부분
-				.load(String.valueOf(tempFile.toURI())) // Operator 시작: URL에서 이미지를 불러옵니다.
-				.placeholder(R.drawable.ic_done_gray) // 불러오는 시간 동안 보여줄 이미지 파일입니다.
-				.error(R.drawable.ic_close_gray) // 불러오지 못하면 보여주는 이미지 파일입니다.
-				.resize(500, 500) // 이미지의 크기를 100x100 사이즈로 리사이즈 해줍니다.
-				.rotate(90f) // 사진 파일을 회전해줍시다. Operator 끝났습니다.
-				.into(PlaceImage); // Output 부분: 변수 이름을 imageView라고 지정한 ImageView에 이미지를 보여줍니다.
-	}
 
 	// startActivityForResult() 반환 기능 requestCode 를 앨범 or 카메라에서 온 경우로 나눠서 처리하는 기능
 	@Override
@@ -282,9 +310,8 @@ public class ReviewRegistActivity extends AppCompatActivity {
 
 		Log.i(TAG, "onActivityResult : 실행");
 
+		// 카메라 촬영하지 않고 돌아왔을 때 처리 로직
 		if (resultCode != Activity.RESULT_OK) {
-
-			// 카메라 촬영하지 않고 돌아왔을 때 처리 로직
 
 			Toast.makeText(this, "취소 되었습니다.", Toast.LENGTH_SHORT).show();
 
@@ -300,52 +327,22 @@ public class ReviewRegistActivity extends AppCompatActivity {
 			return;
 		}
 
+		// 카메라 조건 시작
 		if (requestCode == PICK_FROM_CAMERA) {
 
-			Toast.makeText(this, "카메라 접근후 돌아왔습니다", Toast.LENGTH_SHORT).show();
 
-			Log.i(TAG, "카메라 사용 후 data " + data.getData());
-			setCameraImage();
-
-		} else if (requestCode == PICK_FROM_ALBUM) {
-
-			Uri photoUri = data.getData();
-
-			Log.i(TAG, "photoUri : 실행 " + photoUri);
-
-			Cursor cursor = null;
-
-			try {
-
-				/*
-				 *  Uri 스키마를
-				 *  content:/// 에서 file:/// 로  변경한다.
-				 */
-				String[] proj = {MediaStore.Images.Media.DATA};
-
-				assert photoUri != null;
-				cursor = getContentResolver().query(photoUri, proj, null, null, null);
-
-				assert cursor != null;
-				int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-
-				cursor.moveToFirst();
+		} // 카메라 조건 끝
+		// 갤러리 조건 시작
+		else if (requestCode == PICK_FROM_ALBUM) {
 
 
-				tempFile = new File(cursor.getString(column_index));
+		} // 갤러리 조건 끝
+	} // onActivityResult() 끝
 
-				Log.i(TAG, "cursor.getString : 실행 " + tempFile);
-
-			} finally {
-				if (cursor != null) {
-					cursor.close();
-				}
-			}
-
-			Toast.makeText(this, "갤러리 접근후 돌아왔습니다", Toast.LENGTH_SHORT).show();
-
-			setGallayImage();
-
-		}
+	public void getShard() {
+		SharedPreferences sharedPreferences = getSharedPreferences("sessionName", MODE_PRIVATE);
+		sessionName = sharedPreferences.getString("name", "noName");
 	}
+
+
 } // ReviewRegistActivity 클래스 끝

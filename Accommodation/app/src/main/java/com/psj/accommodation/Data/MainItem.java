@@ -5,12 +5,17 @@ package com.psj.accommodation.Data;
 public class MainItem {
 
 
-	String InfoText, InfoTime, InfoScore;
+	String InfoNum, InfoText, InfoTime, InfoWriter, InfoImage;
+	float InfoScore;
 
-	public MainItem(String infoText, String infoTime, String infoScore) {
+
+	public MainItem(String infoNum, String infoText, String infoTime, float infoScore, String infoImage, String infoWriter) {
+		this.InfoNum = infoNum;
 		this.InfoText = infoText;
 		this.InfoTime = infoTime;
 		this.InfoScore = infoScore;
+		this.InfoImage = infoImage;
+		this.InfoWriter = infoWriter;
 	}
 
 	// 숙박하는 곳 이름 저장 기능
@@ -23,19 +28,19 @@ public class MainItem {
 		return InfoTime;
 	}
 
-	// 숙박한 곳 평점(텍스트) 저장 기능
-	public String getInfoScore() {
+	// 숙박한 곳 평점 저장 기능
+	public float getInfoScore() {
 		return InfoScore;
 	}
 
 	// 이미지 저장 기능
-	public void setReviewImage() {
-
+	public String getInfoImage() {
+		return InfoImage;
 	}
 
-	// 평점(별점) 저장 기능
-	public void setReviewRatingBar() {
 
+	public String getInfoWriter() {
+		return InfoWriter;
 	}
 
 } // MainItem 클래스 끝

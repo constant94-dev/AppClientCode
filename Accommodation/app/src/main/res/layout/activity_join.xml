@@ -44,11 +44,11 @@
         android:id="@+id/MailAccessBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
         android:layout_marginTop="30dp"
+        android:layout_marginRight="10dp"
         android:text="이메일 인증"
-        app:layout_constraintLeft_toRightOf="@+id/UserEmail"
-        app:layout_constraintTop_toBottomOf="@+id/JoinTitle" />
+        app:layout_constraintRight_toLeftOf="@+id/JoinResultBtn"
+        app:layout_constraintTop_toBottomOf="@+id/UserName" />
 
     <TextView
         android:id="@+id/PasswordText"
@@ -63,7 +63,7 @@
 
     <EditText
         android:id="@+id/UserPassword"
-        android:layout_width="250dp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"

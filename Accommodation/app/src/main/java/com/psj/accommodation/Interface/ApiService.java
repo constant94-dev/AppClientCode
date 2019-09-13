@@ -1,9 +1,12 @@
 package com.psj.accommodation.Interface;
 
 
+import com.google.gson.JsonObject;
+
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 // TODO Retrofit API를 사용하기 위해 인터페이스를 만들어야 한다
@@ -35,6 +38,10 @@ public interface ApiService {
 
 	@FormUrlEncoded
 	@POST("/reviewInsert.php")
-	Call<String> reviewAdd(@Field("placeImage") String placeImage, @Field("placeName") String placeName, @Field("timeChoice") String timeChoice, @Field("placeScore") String placeScore);
+	Call<String> reviewInsert(@Field("placeName") String placeName, @Field("placeTime") String placeTime, @Field("placeScore") float placeScore, @Field("placeImage") String placeImage, @Field("writer") String writer);
+
+
+	@GET("/reviewSelect.php")
+	Call<JsonObject> reviewSelect();
 
 } // ApiService 인터페이스 끝

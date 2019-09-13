@@ -36,11 +36,8 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:28.0.0'
     // 카드뷰 라이브러리
     implementation 'com.android.support:cardview-v7:28.0.0'
-    implementation files('libs/javax.mail-api-1.6.2.jar')
-    // 캘린더뷰 라이브러리
+    // 코스모 캘린더 라이브러리
     implementation 'com.github.applikeysolutions:cosmocalendar:1.0.4'
-    // 캘린더뷰 라이브러리
-    implementation 'com.github.yongbeam:AirCalendar:1.0.0'
     // 피카소 라이브러리
     implementation 'com.squareup.picasso:picasso:2.5.2'
 }

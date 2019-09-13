@@ -1,16 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+
     <com.applikeysolutions.cosmocalendar.view.CalendarView
         android:id="@+id/calendar_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/checkDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="선택 날짜 확인"
+        android:layout_margin="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
-    </com.applikeysolutions.cosmocalendar.view.CalendarView>
+    <Button
+        android:id="@+id/resultDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="숙박 기간 선택 완료"
+        android:layout_margin="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
-
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>
