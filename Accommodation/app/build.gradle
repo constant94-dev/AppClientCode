@@ -38,6 +38,11 @@ dependencies {
     implementation 'com.android.support:cardview-v7:28.0.0'
     // 코스모 캘린더 라이브러리
     implementation 'com.github.applikeysolutions:cosmocalendar:1.0.4'
-    // 피카소 라이브러리
-    implementation 'com.squareup.picasso:picasso:2.5.2'
+
+    // 멀티 이미지 선택 라이브러리
+    implementation 'com.github.darsh2:MultipleImageSelect:v0.0.4'
+    // 내가 생성한 app 프로젝트에 라이브러리 모듈을 의존성 추가한다
+    implementation project(path: ':multipleimageselect')
+
+
 }

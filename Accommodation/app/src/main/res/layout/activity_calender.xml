@@ -16,8 +16,8 @@
         android:id="@+id/checkDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="선택 날짜 확인"
         android:layout_margin="20dp"
+        android:text="선택 날짜 확인"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />
 
@@ -25,8 +25,17 @@
         android:id="@+id/resultDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="숙박 기간 선택 완료"
         android:layout_margin="20dp"
+        android:text="숙박 기간 선택 완료"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/resultModify"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="숙박 기간 수정 완료"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 

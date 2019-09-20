@@ -3,11 +3,21 @@ package com.psj.accommodation.Interface;
 
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
+import java.util.Map;
+
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
+import retrofit2.http.PartMap;
+import retrofit2.http.Query;
 
 // TODO Retrofit API를 사용하기 위해 인터페이스를 만들어야 한다
 // TODO Retrofit 인터페이스에 API 정의하고, 인터페이스 클래스를 Retrofit 초기화 하는 과정을 거쳐서 사용하게 된다
@@ -43,5 +53,25 @@ public interface ApiService {
 
 	@GET("/reviewSelect.php")
 	Call<JsonObject> reviewSelect();
+
+	@GET("/reviewUpdate.php")
+	Call<String> reviewUpdate(@Query("placeNum") String placeNum, @Query("placeName") String placeName, @Query("placeImage") String placeImage, @Query("placeTime") String placeTime, @Query("placeScore") float placeScore);
+
+	@GET("/reviewDelete.php")
+	Call<String> reviewDelete(@Query("placeNum") String placeNum);
+
+	// @Multipart -> 요청 본문이 여러 부분이 있다 @Part 주석을 달아야한다
+	// @Part -> Multipart 요청의 단일 부분을 나타낸다
+	// MultipartBody.Part -> 주석에 부품이름이 필요하지 않습니다
+	// RequestBody -> 주석에 부품이름이 필요하다
+	// String, Image, int -> 주석에 부품이름이 필요하다
+	@Multipart
+	@POST("/uploadImage.php")
+	Call<String> uploadImage(@Part MultipartBody.Part file, @Part("name") RequestBody requestBody);
+
+	@Multipart
+	@POST("/multiUploadImage.php")
+	Call<String> multiUploadImage(@Part ArrayList<MultipartBody.Part> files, @Part("totalFiles") RequestBody totalFiles);
+
 
 } // ApiService 인터페이스 끝

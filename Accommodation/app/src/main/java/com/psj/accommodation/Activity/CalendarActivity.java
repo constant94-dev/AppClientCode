@@ -37,12 +37,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static com.psj.accommodation.PublicString.AllPublicString.REQUEST_MODIFY;
+import static com.psj.accommodation.PublicString.AllPublicString.REQUEST_REGIST;
+
 
 // TODO 숙박 기간 선택 화면 캘린더 라이브러리 사용
 public class CalendarActivity extends AppCompatActivity {
-	public static final String TAG = "MainActivity";
+
+	public static final String TAG = "CalendarActivity";
 	private CalendarView calendarView;
-	Button checkDate, resultDate;
+	Button checkDate, resultDate, resultModify;
 	String selectDateStart = "";
 	String selectDateEnd = "";
 
@@ -53,9 +57,34 @@ public class CalendarActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_calender);
 		checkDate = findViewById(R.id.checkDate);
 		resultDate = findViewById(R.id.resultDate);
+		resultModify = findViewById(R.id.resultModify);
 		initViews();
 
 		Log.i(TAG, "onCreate 실행");
+
+		// 데이터 수신
+		Bundle getCalendar = getIntent().getExtras();
+
+		// 인텐트 데이터 수신 조건 시작
+		if (getCalendar == null) {
+			Log.i(TAG, "데이터 수신 할거 없음");
+		} else {
+
+			Log.i(TAG, "데이터 수신 할거 있음");
+
+			int changeDate = getCalendar.getInt("changeDate");
+			Log.i(TAG, "리뷰 리퀘스트 코드 / " + changeDate);
+
+			if (changeDate == REQUEST_MODIFY) {
+				Log.i(TAG, "리뷰 수정 코드 / " + REQUEST_MODIFY);
+				resultDate.setVisibility(View.GONE);
+			} else if (changeDate == REQUEST_REGIST) {
+				Log.i(TAG, "리뷰 등록 코드 / " + REQUEST_REGIST);
+				resultModify.setVisibility(View.GONE);
+			}
+
+
+		} // 인텐트 데이터 수신 조건 끝
 	}
 
 	// 캘린더뷰 라이브러리 초기값 세팅 기능
@@ -140,11 +169,53 @@ public class CalendarActivity extends AppCompatActivity {
 				Intent reviewRegistIntent = new Intent(CalendarActivity.this, ReviewRegistActivity.class);
 				reviewRegistIntent.putExtra("selectDateStart", selectDateStart);
 				reviewRegistIntent.putExtra("selectDateEnd", selectDateEnd);
-				startActivity(reviewRegistIntent);
+				setResult(RESULT_OK, reviewRegistIntent);
 				finish();
 
 			}
-		});
+		}); // 숙박 기간 선택 완료 버튼 클릭 이벤트 끝
+
+		// 숙박 기간 수정 완료 버튼 클릭 이벤트
+		resultModify.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+
+				Log.i(TAG, "숙박 기간 수정 완료 버튼 클릭!!");
+
+				// 내가 선택한 날짜를 리스트에 저장한다
+				List<Calendar> days = calendarView.getSelectedDates();
+
+				// 반복을 사용하여 선택한 날짜에 년,월,일을 가져온다
+				for (int i = 0; i < days.size(); i++) {
+					Calendar calendar = days.get(i);
+					//Log.i(TAG, "반복문 실행 : " + days.get(i).toString());
+					final int day = calendar.get(Calendar.DAY_OF_MONTH);
+					final int month = calendar.get(Calendar.MONTH);
+					final int year = calendar.get(Calendar.YEAR);
+					//String week = new SimpleDateFormat("EE").format(calendar.getTime());
+
+					if (i == 0) {
+						String day_full = year + "년 " + (month + 1) + "월 " + day + "일";
+						selectDateStart = day_full;
+					} else if (i == days.size() - 1) {
+						String day_full = year + "년 " + (month + 1) + "월 " + day + "일";
+						selectDateEnd = day_full;
+					}
+
+				}
+
+
+				// 인텐트를 리뷰 등록 화면으로 이동
+				Log.i(TAG, "숙박 시작 날짜 : " + selectDateStart);
+				Log.i(TAG, "숙박 끝 날짜 : " + selectDateEnd);
+
+				Intent reviewModifyIntent = new Intent(CalendarActivity.this, ReviewModifyActivity.class);
+				reviewModifyIntent.putExtra("selectDateStart", selectDateStart);
+				reviewModifyIntent.putExtra("selectDateEnd", selectDateEnd);
+				setResult(RESULT_OK, reviewModifyIntent);
+				finish();
+			}
+		}); // 숙박 기간 수정 완료 버튼 클릭 이벤트 끝
 
 	} // onResume() 끝
 

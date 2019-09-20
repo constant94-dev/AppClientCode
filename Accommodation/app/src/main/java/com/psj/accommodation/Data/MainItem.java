@@ -18,27 +18,31 @@ public class MainItem {
 		this.InfoWriter = infoWriter;
 	}
 
-	// 숙박하는 곳 이름 저장 기능
+	public String getInfoNum() {
+		return InfoNum;
+	}
+
+	// 숙박하는 곳 이름 반환 기능
 	public String getInfoText() {
 		return InfoText;
 	}
 
-	// 숙박 기간 저장 기능
+	// 숙박 기간 반환 기능
 	public String getInfoTime() {
 		return InfoTime;
 	}
 
-	// 숙박한 곳 평점 저장 기능
+	// 숙박한 곳 평점 반환 기능
 	public float getInfoScore() {
 		return InfoScore;
 	}
 
-	// 이미지 저장 기능
+	// 이미지 반환 기능
 	public String getInfoImage() {
 		return InfoImage;
 	}
 
-
+	// 작성자 반환 기능
 	public String getInfoWriter() {
 		return InfoWriter;
 	}

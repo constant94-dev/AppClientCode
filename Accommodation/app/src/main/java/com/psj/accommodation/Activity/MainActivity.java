@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
 			// String, float 형태 값 가져오기
 			String PlaceNum = getRegister.getString("PlaceNum");
+			String PlaceImage = getRegister.getString("PlaceImage");
 			String PlaceTime = getRegister.getString("PlaceTime");
 			String PlaceName = getRegister.getString("PlaceName");
 			float PlaceScore = getRegister.getFloat("PlaceScore");
@@ -129,8 +130,9 @@ public class MainActivity extends AppCompatActivity {
 
 			// 첫번째 줄에 삽입됨
 			// 0을 빼고 notifyItemInserted 0 만 해주어도 리사이클러뷰 맨위에 삽입 된다
-			mainItemList.add(0, new MainItem(PlaceNum, PlaceName, PlaceTime, PlaceScore, "image", Writer));
+			mainItemList.add(0, new MainItem(PlaceNum, PlaceName, PlaceTime, PlaceScore, PlaceImage, Writer));
 
+			// 변경된 값 리사이클러뷰 적용하기
 			mainAdapter.notifyItemInserted(0);
 
 
