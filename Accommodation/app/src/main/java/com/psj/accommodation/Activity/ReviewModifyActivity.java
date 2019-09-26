@@ -6,9 +6,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -56,9 +59,15 @@ public class ReviewModifyActivity extends AppCompatActivity {
 	String ServerImagePath = "";
 
 	ImageView ModifyImage, Home;
-	TextView ModifyName, ModifyTime, ModifyImageCount;
+	TextView ModifyName, ModifyTime, ModifyImageCount, ModifyReviewCount;
 	RatingBar ModifyScore;
 	Button ModifyOK, ModifyCancel;
+	EditText ModifyPlaceReview;
+
+	// 숙박 후기 최대 글자 수
+	int MAX_COUNT = 100;
+	// 숙박 후기 글자 수 저장
+	int ING_COUNT = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +82,10 @@ public class ReviewModifyActivity extends AppCompatActivity {
 		ModifyImage = findViewById(R.id.ModifyImage);
 		ModifyImageCount = findViewById(R.id.ModifyImageCount);
 		Home = findViewById(R.id.Home);
+		ModifyPlaceReview = findViewById(R.id.ModifyPlaceReview);
+		ModifyReviewCount = findViewById(R.id.ModifyReviewCount);
+
+
 		// 쉐어드에 저장된 사용자 이름 가져오기 기능
 		getShard();
 
@@ -92,12 +105,14 @@ public class ReviewModifyActivity extends AppCompatActivity {
 			String PlaceTime = getModify.getString("PlaceTime");
 			String PlaceName = getModify.getString("PlaceName");
 			float PlaceScore = getModify.getFloat("PlaceScore");
+			String PlaceReview = getModify.getString("PlaceReview");
 
 			Log.i(TAG, "리뷰 번호 : " + PlaceNum);
 			Log.i(TAG, "숙박 장소 이미지 경로 : " + PlaceImage);
 			Log.i(TAG, "숙박 장소 : " + PlaceName);
 			Log.i(TAG, "숙박 기간 : " + PlaceTime);
 			Log.i(TAG, "평점 : " + PlaceScore);
+			Log.i(TAG, "후기 : " + PlaceReview);
 
 			String[] imagePath = PlaceImage.split(" ");
 
@@ -105,7 +120,8 @@ public class ReviewModifyActivity extends AppCompatActivity {
 			ModifyName.setText(PlaceName);
 			ModifyTime.setText(PlaceTime);
 			ModifyScore.setRating(PlaceScore);
-			ModifyImageCount.setText("외 " + (imagePath.length - 1));
+			ModifyPlaceReview.setText(PlaceReview);
+			ModifyImageCount.setText("대표 이미지");
 
 
 		} // 인텐트 데이터 수신 조건 끝
@@ -122,6 +138,32 @@ public class ReviewModifyActivity extends AppCompatActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		ModifyPlaceReview.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+				Log.i(TAG, "PlaceReview beforeTextChanged : 실행");
+			}
+
+			@Override
+			public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+				Log.i(TAG, "PlaceReview onTextChanged : 실행");
+
+				ING_COUNT = charSequence.length();
+
+				ModifyReviewCount.setText(ING_COUNT + "/100");
+
+				if (charSequence.length() == MAX_COUNT) {
+					ModifyReviewCount.setText(MAX_COUNT + "/100");
+					ModifyPlaceReview.setSelection(MAX_COUNT);
+				}
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				Log.i(TAG, "PlaceReview afterTextChanged : 실행");
+			}
+		});
 
 		Home.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -170,6 +212,10 @@ public class ReviewModifyActivity extends AppCompatActivity {
 				} else if (ModifyName.getText().length() == 0) {
 
 					Toast.makeText(ReviewModifyActivity.this, "장소명을 입력하세요", Toast.LENGTH_SHORT).show();
+				} else if (ModifyPlaceReview.getText().length() == 0) {
+
+					Toast.makeText(ReviewModifyActivity.this, "후기를 입력하세요", Toast.LENGTH_SHORT).show();
+
 				} else {
 
 					Toast.makeText(ReviewModifyActivity.this, "등록을 시작합니다.", Toast.LENGTH_SHORT).show();
@@ -179,6 +225,7 @@ public class ReviewModifyActivity extends AppCompatActivity {
 
 					Log.i(TAG, "ServerImagePath 업데이트 경로2 : " + ServerImagePath);
 					review.setPlaceImage(ServerImagePath);
+					review.setPlaceReview(ModifyPlaceReview.getText().toString());
 					review.setPlaceTime(ModifyTime.getText().toString());
 					review.setPlaceName(ModifyName.getText().toString());
 					review.setPlaceScore(ModifyScore.getRating());
@@ -190,7 +237,7 @@ public class ReviewModifyActivity extends AppCompatActivity {
 					ApiService apiService = retroClient.getApiClient().create(ApiService.class);
 
 					// 인터페이스 ApiService에 선언한 reviewUpdate()를 호출합니다
-					Call<String> call = apiService.reviewUpdate(PlaceNum, review.getPlaceName(), review.getPlaceImage(), review.getPlaceTime(), review.getPlaceScore());
+					Call<String> call = apiService.reviewUpdate(PlaceNum, review.getPlaceName(), review.getPlaceImage(), review.getPlaceTime(), review.getPlaceScore(), review.getPlaceReview());
 
 					call.enqueue(new Callback<String>() {
 						@Override
@@ -271,7 +318,7 @@ public class ReviewModifyActivity extends AppCompatActivity {
 			} // 반복문 끝
 			Log.i(TAG, "갤러리에서 선택한 이미지 경로 개수 : " + postUriList.size());
 			// 갤러리에서 선택한 이미지가 2개 이상 일때 보여줄 개수
-			ModifyImageCount.setText("외 " + (images.size() - 1));
+			ModifyImageCount.setText("대표 이미지");
 
 			Log.i(TAG, "대표이미지 경로 : " + images.get(0).path);
 

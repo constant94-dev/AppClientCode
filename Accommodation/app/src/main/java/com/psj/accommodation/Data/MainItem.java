@@ -5,17 +5,18 @@ package com.psj.accommodation.Data;
 public class MainItem {
 
 
-	String InfoNum, InfoText, InfoTime, InfoWriter, InfoImage;
+	String InfoNum, InfoText, InfoTime, InfoWriter, InfoImage, InfoReview;
 	float InfoScore;
 
 
-	public MainItem(String infoNum, String infoText, String infoTime, float infoScore, String infoImage, String infoWriter) {
+	public MainItem(String infoNum, String infoText, String infoTime, float infoScore, String infoImage, String infoReview, String infoWriter) {
 		this.InfoNum = infoNum;
 		this.InfoText = infoText;
 		this.InfoTime = infoTime;
 		this.InfoScore = infoScore;
 		this.InfoImage = infoImage;
 		this.InfoWriter = infoWriter;
+		this.InfoReview = infoReview;
 	}
 
 	public String getInfoNum() {
@@ -45,6 +46,10 @@ public class MainItem {
 	// 작성자 반환 기능
 	public String getInfoWriter() {
 		return InfoWriter;
+	}
+
+	public String getInfoReview() {
+		return InfoReview;
 	}
 
 } // MainItem 클래스 끝

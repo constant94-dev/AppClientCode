@@ -48,17 +48,30 @@ public interface ApiService {
 
 	@FormUrlEncoded
 	@POST("/reviewInsert.php")
-	Call<String> reviewInsert(@Field("placeName") String placeName, @Field("placeTime") String placeTime, @Field("placeScore") float placeScore, @Field("placeImage") String placeImage, @Field("writer") String writer);
+	Call<String> reviewInsert(@Field("placeName") String placeName, @Field("placeTime") String placeTime, @Field("placeScore") float placeScore, @Field("placeImage") String placeImage, @Field("writer") String writer, @Field("placeReview") String placeReview);
 
+	@FormUrlEncoded
+	@POST("/commentInsert.php")
+	Call<String> commentInsert(@Field("userEmail") String UserEmail, @Field("placeNum") String placeNum, @Field("commentData") String commentData);
+
+	@GET("/commentSelect.php")
+	Call<String> commentSelect(@Query("placeNum") String placeNum);
+
+	@GET("/commentDelete.php")
+	Call<String> commentDelete(@Query("commentNum") String commentNum);
 
 	@GET("/reviewSelect.php")
 	Call<JsonObject> reviewSelect();
 
+	@GET("/reviewSelectScore.php")
+	Call<JsonObject> reviewSelectScore();
+
 	@GET("/reviewUpdate.php")
-	Call<String> reviewUpdate(@Query("placeNum") String placeNum, @Query("placeName") String placeName, @Query("placeImage") String placeImage, @Query("placeTime") String placeTime, @Query("placeScore") float placeScore);
+	Call<String> reviewUpdate(@Query("placeNum") String placeNum, @Query("placeName") String placeName, @Query("placeImage") String placeImage, @Query("placeTime") String placeTime, @Query("placeScore") float placeScore, @Query("placeReview") String placeReview);
 
 	@GET("/reviewDelete.php")
 	Call<String> reviewDelete(@Query("placeNum") String placeNum);
+
 
 	// @Multipart -> 요청 본문이 여러 부분이 있다 @Part 주석을 달아야한다
 	// @Part -> Multipart 요청의 단일 부분을 나타낸다
@@ -72,6 +85,7 @@ public interface ApiService {
 	@Multipart
 	@POST("/multiUploadImage.php")
 	Call<String> multiUploadImage(@Part ArrayList<MultipartBody.Part> files, @Part("totalFiles") RequestBody totalFiles);
+
 
 
 } // ApiService 인터페이스 끝

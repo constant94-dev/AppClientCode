@@ -5,9 +5,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,15 +20,20 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.google.gson.JsonObject;
+import com.psj.accommodation.Adapter.DetailSlideAdapter;
 import com.psj.accommodation.Adapter.MainAdapter;
 import com.psj.accommodation.Data.MainItem;
 import com.psj.accommodation.Data.Review;
 import com.psj.accommodation.Data.ReviewSelect;
+import com.psj.accommodation.Fragment.MainDateFragment;
+import com.psj.accommodation.Fragment.MainScoreFragment;
 import com.psj.accommodation.Interface.ApiService;
 import com.psj.accommodation.R;
 
@@ -51,8 +61,10 @@ public class MainActivity extends AppCompatActivity {
 	private RecyclerView.LayoutManager mainLayoutManager;
 	private String mainJsonString;
 
+	ImageView Home;
+	TextView reviewRegister, main_fragment_date, main_fragment_score;
 
-	TextView reviewRegister;
+	private boolean isFragment = true;
 
 	// 메인 아이템 리스트
 	private static ArrayList<MainItem> mainItemList;
@@ -63,6 +75,9 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 
 		reviewRegister = findViewById(R.id.ReviewRegisterText);
+		Home = findViewById(R.id.Home);
+		main_fragment_date = findViewById(R.id.main_fragment_date);
+		main_fragment_score = findViewById(R.id.main_fragment_score);
 
 		Log.i(TAG, "onCreate : 실행");
 
@@ -80,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 		mainAdapter = new MainAdapter(getApplicationContext(), mainItemList);
 		mainRecyclerView.setAdapter(mainAdapter);
 
-		getReviewData();
+		getReviewTimeData();
 
 		// 안드로이드 SDK 버전 23 이상이라면 권한 요청해야됨
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -123,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
 			String PlaceTime = getRegister.getString("PlaceTime");
 			String PlaceName = getRegister.getString("PlaceName");
 			float PlaceScore = getRegister.getFloat("PlaceScore");
+			String PlaceReview = getRegister.getString("PlaceReview");
 			String Writer = getRegister.getString("Writer");
 
 			// 데이터준비 실제로는 ArrayList<>등을 사용해야 할듯 하다.
@@ -130,13 +146,20 @@ public class MainActivity extends AppCompatActivity {
 
 			// 첫번째 줄에 삽입됨
 			// 0을 빼고 notifyItemInserted 0 만 해주어도 리사이클러뷰 맨위에 삽입 된다
-			mainItemList.add(0, new MainItem(PlaceNum, PlaceName, PlaceTime, PlaceScore, PlaceImage, Writer));
+			mainItemList.add(0, new MainItem(PlaceNum, PlaceName, PlaceTime, PlaceScore, PlaceReview, PlaceImage, Writer));
 
 			// 변경된 값 리사이클러뷰 적용하기
 			mainAdapter.notifyItemInserted(0);
 
 
 		} // 인텐트 데이터 수신 조건 끝
+
+
+//		FragmentManager fragmentManager = getSupportFragmentManager();
+//		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//		fragmentTransaction.add(R.id.main_recycler_view, new MainDateFragment());
+//		fragmentTransaction.commit();
+
 
 	} // onCreate() 끝
 
@@ -155,6 +178,40 @@ public class MainActivity extends AppCompatActivity {
 
 		Log.i(TAG, "onResume : 실행");
 
+		main_fragment_date.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Log.i(TAG, "main_fragment_date : 클릭");
+
+				main_fragment_date.setTextColor(main_fragment_date.getResources().getColor(R.color.colorBlue));
+				main_fragment_score.setTextColor(main_fragment_score.getResources().getColor(R.color.colorBlack));
+
+				getReviewTimeData();
+
+			}
+		});
+
+		main_fragment_score.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Log.i(TAG, "main_fragment_score : 클릭");
+
+				main_fragment_score.setTextColor(main_fragment_score.getResources().getColor(R.color.colorBlue));
+				main_fragment_date.setTextColor(main_fragment_date.getResources().getColor(R.color.colorBlack));
+
+				getReviewScoreData();
+			}
+		});
+
+
+		Home.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent mainIntent = new Intent(MainActivity.this, MainActivity.class);
+				startActivity(mainIntent);
+				finish();
+			}
+		});
 
 		// 등록 눌렀을 때
 		reviewRegister.setOnClickListener(new View.OnClickListener() {
@@ -251,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
 	} // showDialogForPermission() 끝
 
 	// 레트로핏 사용하여 데이터베이스 데이터 가져오기
-	public void getReviewData() {
+	public void getReviewTimeData() {
 		// 레트로핏 서버 URL 설정해놓은 객체 생성
 		RetroClient retroClient = new RetroClient();
 		// GET, POST 같은 서버에 데이터를 보내기 위해서 생성합니다
@@ -285,17 +342,55 @@ public class MainActivity extends AppCompatActivity {
 
 	} // getReviewData() 끝
 
+	// 레트로핏 사용하여 데이터베이스 데이터 가져오기
+	public void getReviewScoreData() {
+		// 레트로핏 서버 URL 설정해놓은 객체 생성
+		RetroClient retroClient = new RetroClient();
+		// GET, POST 같은 서버에 데이터를 보내기 위해서 생성합니다
+		ApiService apiService = retroClient.getApiClient().create(ApiService.class);
+
+		// 인터페이스 ApiService에 선언한 reviewSelect()를 호출합니다
+		Call<JsonObject> call = apiService.reviewSelectScore();
+
+		call.enqueue(new Callback<JsonObject>() {
+			@Override
+			public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+				Log.i(TAG, "onResponse : 실행");
+				Log.i(TAG, "서버에서 응답 받은 값 : " + response.body().toString());
+
+				// 리스트를 초기화 시킨다
+				mainItemList.clear();
+				// 어댑터에게 데이터 세팅이 변경되었다고 알려준다
+				mainAdapter.notifyDataSetChanged();
+
+				mainJsonString = response.body().toString();
+				showResult();
+			}
+
+			@Override
+			public void onFailure(Call<JsonObject> call, Throwable throwable) {
+				Log.i("onFailure", "" + throwable);
+				Toast.makeText(MainActivity.this, "onFailure / " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		});
+
+
+	} // getReviewData() 끝
+
 
 	// 서버에서 json 형태로 가져온 값을 리사이클러뷰에 추가 시키는 방법
 	private void showResult() {
 
-		String TAG_JSON = "review";
+		Log.i(TAG, "showResult : 실행");
+
+		String TAG_JSON = "result";
 		String TAG_NUM = "num";
 		String TAG_NAME = "name";
 		String TAG_TIME = "time";
 		String TAG_SCORE = "score";
 		String TAG_WRITER = "writer";
 		String TAG_IMAGE = "image";
+		String TAG_REVIEW = "review";
 
 
 		try {
@@ -315,9 +410,13 @@ public class MainActivity extends AppCompatActivity {
 				float score = (float) item.getDouble(TAG_SCORE);
 				String writer = item.getString(TAG_WRITER);
 				String image = item.getString(TAG_IMAGE);
+				String review = item.getString(TAG_REVIEW);
+
+				Log.i(TAG, "반복문 : 실행");
+				Log.i(TAG, i + "번째 -> 리뷰번호 : " + num + "/ 리뷰제목 : " + name + "/ 리뷰작성시간 : " + time + "/ 리뷰평점 : " + score + "/ 리뷰작성자 : " + writer + "/ 리뷰이미지경로 : " + image);
 
 				// 어댑터에 전달할 데이터 추가
-				mainItemList.add(0, new MainItem(num, name, time, score, image, writer));
+				mainItemList.add(new MainItem(num, name, time, score, image, review, writer));
 				// 어댑터에게 새로 삽입된 아이템이 있다는걸 알려준다
 				mainAdapter.notifyItemInserted(0);
 			}
@@ -328,6 +427,23 @@ public class MainActivity extends AppCompatActivity {
 			Log.d(TAG, "showResult : ", e);
 		}
 
+	} // showResult() 끝
+
+	public void switchFragment() {
+		Fragment newFragment;
+
+		if (isFragment) {
+			newFragment = new MainDateFragment();
+		} else {
+			newFragment = new MainScoreFragment();
+		}
+
+		isFragment = (isFragment) ? false : true;
+
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+		fragmentTransaction.replace(R.id.main_recycler_view, newFragment);
+		fragmentTransaction.commit();
 	}
 
 } // MainActivity 클래스 끝

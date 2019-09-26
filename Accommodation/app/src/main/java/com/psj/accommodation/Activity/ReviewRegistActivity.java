@@ -24,6 +24,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -75,12 +77,18 @@ public class ReviewRegistActivity extends AppCompatActivity {
 	Button ReviewOK, ReviewCancel;
 	// 기간선택 텍스트
 	TextView PlaceTime;
-	// 숙박장소 이미지 개수
-	TextView PlaceImageCount;
+	// 숙박장소 이미지 개수 출력, 숙박 후기 글자 수 출력
+	TextView PlaceImageCount, ReviewCount;
 	// 숙박장소 이름
 	EditText PlaceName;
 	// 평점
 	RatingBar PlaceScore;
+	// 숙박 후기
+	EditText PlaceReview;
+	// 숙박 후기 최대 글자 수
+	int MAX_COUNT = 100;
+	// 숙박 후기 글자 수 저장
+	int ING_COUNT = 0;
 
 	// 액티비티 태그
 	public static final String TAG = "ReviewRegistActivity";
@@ -114,6 +122,8 @@ public class ReviewRegistActivity extends AppCompatActivity {
 		PlaceName = findViewById(R.id.PlaceName);
 		PlaceScore = findViewById(R.id.PlaceScore);
 		PlaceImageCount = findViewById(R.id.PlaceImageCount);
+		PlaceReview = findViewById(R.id.PlaceReview);
+		ReviewCount = findViewById(R.id.ReviewCount);
 
 		PlaceScore.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
 			@Override
@@ -140,6 +150,36 @@ public class ReviewRegistActivity extends AppCompatActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+
+		// 숙박 후기 글자 수 체크 이벤트
+		PlaceReview.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+				Log.i(TAG, "PlaceReview beforeTextChanged : 실행");
+			}
+
+			@Override
+			public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+				Log.i(TAG, "PlaceReview onTextChanged : 실행");
+
+				Log.i(TAG, "ING_COUNT : " + ING_COUNT);
+				Log.i(TAG, "charSequence.length() : " + charSequence.length());
+
+				ING_COUNT = charSequence.length();
+
+				ReviewCount.setText(ING_COUNT + "/100");
+
+				if (charSequence.length() == MAX_COUNT) {
+					ReviewCount.setText(MAX_COUNT + "/100");
+					PlaceReview.setSelection(MAX_COUNT);
+				}
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				Log.i(TAG, "PlaceReview afterTextChanged : 실행");
+			}
+		});
 
 		// 숙박 장소 이미지 클릭 이벤트
 		PlaceImage.setOnClickListener(new View.OnClickListener() {
@@ -179,6 +219,7 @@ public class ReviewRegistActivity extends AppCompatActivity {
 				Log.i(TAG, "ReviewOK : 실행");
 				Log.i(TAG, "PlaceTime : " + PlaceTime.getText());
 				Log.i(TAG, "PlaceName : " + PlaceName.getText());
+				Log.i(TAG, "PlaceReview : " + PlaceReview.getText());
 				//Log.i(TAG, "stringBuffer length : " + stringBuffer.length());
 
 				if (stringBuffer.length() == 0) {
@@ -193,6 +234,10 @@ public class ReviewRegistActivity extends AppCompatActivity {
 
 					Toast.makeText(ReviewRegistActivity.this, "장소명을 입력하세요", Toast.LENGTH_SHORT).show();
 
+				} else if (PlaceReview.getText().length() == 0) {
+
+					Toast.makeText(ReviewRegistActivity.this, "후기를 입력하세요", Toast.LENGTH_SHORT).show();
+
 				} else {
 
 					Toast.makeText(ReviewRegistActivity.this, "등록을 시작합니다", Toast.LENGTH_SHORT).show();
@@ -200,6 +245,7 @@ public class ReviewRegistActivity extends AppCompatActivity {
 					// 리뷰 임시저장 객체
 					review = new Review();
 
+					review.setPlaceReview(PlaceReview.getText().toString());
 					review.setPlaceImage(ServerImagePath);
 					review.setPlaceTime(PlaceTime.getText().toString());
 					review.setPlaceName(PlaceName.getText().toString());
@@ -212,7 +258,7 @@ public class ReviewRegistActivity extends AppCompatActivity {
 					ApiService apiService = retroClient.getApiClient().create(ApiService.class);
 
 					// 인터페이스 ApiService에 선언한 reviewInsert()를 호출합니다
-					Call<String> call = apiService.reviewInsert(review.getPlaceName(), review.getPlaceTime(), review.getPlaceScore(), review.getPlaceImage(), review.getWriter());
+					Call<String> call = apiService.reviewInsert(review.getPlaceName(), review.getPlaceTime(), review.getPlaceScore(), review.getPlaceImage(), review.getWriter(), review.getPlaceReview());
 					// onResponse() 메서드를 이용해 응답을 전달받아서 요청에 대한 결과를 받을 수 있습니다
 					call.enqueue(new Callback<String>() {
 						@Override
@@ -230,6 +276,7 @@ public class ReviewRegistActivity extends AppCompatActivity {
 								MainIntent.putExtra("PlaceTime", review.getPlaceTime());
 								MainIntent.putExtra("PlaceName", review.getPlaceName());
 								MainIntent.putExtra("PlaceScore", review.getPlaceScore());
+								MainIntent.putExtra("PlaceReview", review.getPlaceReview());
 								MainIntent.putExtra("Writer", review.getWriter());
 								startActivity(MainIntent);
 								finish();
@@ -319,9 +366,9 @@ public class ReviewRegistActivity extends AppCompatActivity {
 			} // 반복문 끝
 			Log.i(TAG, "갤러리에서 선택한 이미지 경로 개수 : " + postUriList.size());
 			// 갤러리에서 선택한 이미지가 2개 이상 일때 보여줄 개수
-			PlaceImageCount.setText("외 " + (images.size() - 1));
+			PlaceImageCount.setText("대표 이미지");
 
-			Log.i(TAG, "대표이미지 경로 : "+images.get(0).path);
+			Log.i(TAG, "대표이미지 경로 : " + images.get(0).path);
 
 			// 갤러리에서 처음 선택한 이미지를 대표이미지로 보여줌
 			Glide.with(ReviewRegistActivity.this)

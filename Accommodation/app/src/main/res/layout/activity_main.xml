@@ -51,14 +51,16 @@
         android:weightSum="1">
 
         <TextView
+            android:id="@+id/main_fragment_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.1"
-            android:text="날짜순"
+            android:text="최신순"
             android:textColor="@color/colorBlue"
             android:textSize="30sp" />
 
         <TextView
+            android:id="@+id/main_fragment_score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.1"
@@ -75,21 +77,21 @@
         android:orientation="vertical"
         android:weightSum="1">
 
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/main_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="10dp"
-            android:layout_weight="0.6"
-            android:scrollbars="vertical" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="wrap_content"
             android:layout_weight="0.4"
             android:background="@color/colorWhite"
             android:orientation="horizontal"
+            android:padding="10dp"
             android:weightSum="1">
 
             <ImageView

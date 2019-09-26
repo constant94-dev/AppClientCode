@@ -15,7 +15,6 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.psj.accommodation.Activity.MainActivity;
 import com.psj.accommodation.Activity.ReviewDetailActivity;
 import com.psj.accommodation.Data.MainItem;
 import com.psj.accommodation.R;
@@ -67,7 +66,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 	@Override
 	public MainAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
 		// create a new view
-		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_cardview, parent, false);
+		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_maincard, parent, false);
 		// set the view's size, margins, paddings and layout parameters
 
 		ViewHolder viewholder = new ViewHolder(view);
@@ -86,15 +85,17 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 		Log.i(TAG, "이미지 경로 : " + ServerImagePath + mainData.get(position).getInfoImage());
 		Log.i(TAG, "이미지 경로 분할 : " + ServerImagePath + imagePath[0]);
 		Log.i(TAG, "이미지 경로 사이즈 : " + imagePath.length);
+		Log.i(TAG, "후기 글 : " + mainData.get(position).getInfoReview());
 
 
 		Glide.with(mainContext).load(Uri.parse(ServerImagePath + imagePath[0])).centerCrop().into(viewHolder.ReviewImage);
 		//viewHolder.ReviewImage.setImageURI(Uri.parse(mainData.get(position).getInfoImage()));
-		viewHolder.ImageCount.setText("1/"+imagePath.length);
+		viewHolder.ImageCount.setText("1/" + imagePath.length);
 		viewHolder.InfoText.setText(mainData.get(position).getInfoText());
 		viewHolder.InfoTime.setText(mainData.get(position).getInfoTime());
 		viewHolder.ReviewScore.setRating(mainData.get(position).getInfoScore());
 		viewHolder.InfoWriter.setText(mainData.get(position).getInfoWriter());
+
 
 		// 아이템 클릭시 상세리뷰 화면으로 이동하는 기능
 		viewHolder.main_card_view.setOnClickListener(new View.OnClickListener() {
@@ -112,6 +113,7 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.ViewHolder> {
 				detailIntent.putExtra("PlaceTime", viewHolder.InfoTime.getText());
 				detailIntent.putExtra("PlaceScore", viewHolder.ReviewScore.getRating());
 				detailIntent.putExtra("Writer", viewHolder.InfoWriter.getText());
+				detailIntent.putExtra("PlaceReview", mainData.get(position).getInfoReview());
 				mainContext.startActivity(detailIntent);
 			}
 		});

@@ -108,7 +108,7 @@ public class JoinActivity extends AppCompatActivity {
 						@Override
 						public void onResponse(Call<String> call, Response<String> response) {
 
-							Toast.makeText(JoinActivity.this, "서버에서 받은 응답 값 : " + response.body(), Toast.LENGTH_LONG).show();
+							//Toast.makeText(JoinActivity.this, "서버에서 받은 응답 값 : " + response.body(), Toast.LENGTH_LONG).show();
 
 							if (response.body().equals("계정존재")) {
 								failMail();

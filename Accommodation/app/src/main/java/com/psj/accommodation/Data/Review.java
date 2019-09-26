@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 // TODO HTTP 통신을한 요청(request)에 대한 String,float 형태 응답(response)을 받기 위한 폼
 public class Review {
 
-	String placeNum, placeName, placeTime, placeImage, writer;
+	String placeNum, placeName, placeTime, placeImage, writer, placeReview;
 	float placeScore;
 
 	public String getPlaceName() {
@@ -55,6 +55,14 @@ public class Review {
 
 	public String getPlaceNum() {
 		return placeNum;
+	}
+
+	public String getPlaceReview() {
+		return placeReview;
+	}
+
+	public void setPlaceReview(String placeReview) {
+		this.placeReview = placeReview;
 	}
 
 

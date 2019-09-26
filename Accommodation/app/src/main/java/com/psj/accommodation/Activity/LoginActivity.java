@@ -25,11 +25,16 @@ import retrofit2.Response;
 // TODO 로그인 화면
 public class LoginActivity extends AppCompatActivity {
 
+	public static final String TAG = "LoginActivity";
+
 	EditText LoginEmail, LoginPassword;
 	Button LoginBtn, JoinBtn;
 	AlertDialog alertDialog;
 
+	// 로그인한 사용자 이름
 	String loginName = "";
+	// 로그인한 사용자 이메일
+	String loginEmail = "";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +73,7 @@ public class LoginActivity extends AppCompatActivity {
 					@Override
 					public void onResponse(Call<String> call, Response<String> response) {
 
-						Toast.makeText(LoginActivity.this, "서버에서 받은 응답 값 : " + response.body().toString(), Toast.LENGTH_LONG).show();
+						//Toast.makeText(LoginActivity.this, "서버에서 받은 응답 값 : " + response.body().toString(), Toast.LENGTH_LONG).show();
 						String loginNameLast = "";
 
 						// 쉐어드에 사용자이름을 저장하기 위한 사전 작업
@@ -79,6 +84,8 @@ public class LoginActivity extends AppCompatActivity {
 							Log.i("분리한 문자열 마지막 1자리 : ", "" + loginNameLast);
 							loginName = response.body().substring(0, loginNameLength - 1);
 							Log.i("분리한 문자열 이름 : ", "" + loginName);
+							loginEmail = LoginEmail.getText().toString();
+							Log.i("로그인한 사용자 이메일 : ", "" + loginEmail);
 
 						}
 
@@ -215,13 +222,19 @@ public class LoginActivity extends AppCompatActivity {
 
 	// 쉐어드 저장해서 세션처럼 활용하기 위한 기능
 	public void saveShard() {
+
+		Log.i(TAG, "saveShard 실행");
+
 		// 쉐어드 sessionName 이름, 기본모드로 설정
 		SharedPreferences sharedPreferences = getSharedPreferences("sessionName", MODE_PRIVATE);
 		// editor 이용 값을 쉐어드에 저장
 		SharedPreferences.Editor editor = sharedPreferences.edit();
+		Log.i(TAG, "로그인한 사용자 이름 : " + loginName);
+		Log.i(TAG, "로그인한 사용자 이메일 : " + loginEmail);
 		// key, value 형태로 저장
 		// loginName (사용자가 입력한 저장할 데이터)
 		editor.putString("name", loginName);
+		editor.putString("email", loginEmail);
 		editor.commit();
 	}
 
