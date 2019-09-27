@@ -50,7 +50,7 @@ public class ReviewDetailActivity extends AppCompatActivity {
 	ImageView Home, DetailChange;
 	TextView DetailName, DetailTime, DetailScore, DetailReview, DetailCommentLength, DetailCommentCount;
 	EditText DetailComment;
-	Button DetailCommentBtn;
+	Button CommentBtn, CommentModifyBtn;
 
 	// 쉐어드에 저장된 사용자 이름 (세션)
 	String sessionName = "";
@@ -100,8 +100,9 @@ public class ReviewDetailActivity extends AppCompatActivity {
 		DetailChange = findViewById(R.id.DetailChange);
 		DetailReview = findViewById(R.id.DetailReview);
 		DetailComment = findViewById(R.id.DetailComment);
-		DetailCommentBtn = findViewById(R.id.DetailCommentBtn);
+		CommentBtn = findViewById(R.id.CommentBtn);
 		DetailCommentLength = findViewById(R.id.DetailCommentLength);
+		CommentModifyBtn = findViewById(R.id.CommentModifyBtn);
 
 		Log.i(TAG, "onCreate : 실행");
 
@@ -116,7 +117,78 @@ public class ReviewDetailActivity extends AppCompatActivity {
 		commentRecyclerView.setLayoutManager(commentLayoutManager);
 
 		// Adapter 셋팅
-		commentAdapter = new CommentAdapter(getApplicationContext(), commentItemList);
+		commentAdapter = new CommentAdapter(getApplicationContext(), commentItemList, new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (v.getTag() != null) {
+
+					CommentModifyBtn.setVisibility(View.VISIBLE);
+					CommentBtn.setVisibility(View.GONE);
+
+					final int position = (int) v.getTag();
+					Log.i(TAG, "어댑터에서 가져온 태그 값 : " + position);
+					String modify = commentItemList.get(position).getcommentData();
+					Log.i(TAG, "수정 할 댓글 원본 : " + modify);
+					DetailComment.setText(modify);
+
+					final String commentNumCheck = commentItemList.get(position).getcommentNum();
+					Log.i(TAG, "수정 할 댓글 고유 번호 : " + commentNumCheck);
+
+
+					// 등록 버튼 사라지고 출력된 수정 버튼 클릭 이벤트
+					CommentModifyBtn.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+
+							Log.i(TAG, "수정 할 댓글 수정본 : " + DetailComment.getText().toString());
+							final String modifyComment = DetailComment.getText().toString();
+
+							commentItemList.get(position).setcommentData(modifyComment);
+
+							// 레트로핏 서버 URL 설정해놓은 객체 생성
+							RetroClient retroClient = new RetroClient();
+							// GET, POST 같은 서버에 데이터를 보내기 위해서 생성합니다
+							ApiService apiService = retroClient.getApiClient().create(ApiService.class);
+
+							// 인터페이스 ApiService에 선언한 commentUpdate()를 호출합니다
+							Call<String> call = apiService.commentUpdate(commentNumCheck, modifyComment);
+
+							call.enqueue(new Callback<String>() {
+								@Override
+								public void onResponse(Call<String> call, Response<String> response) {
+									Log.i(TAG, "onResponse 실행");
+									Toast.makeText(ReviewDetailActivity.this, "서버에서 받은 응답 값 : " + response.body(), Toast.LENGTH_LONG).show();
+									Log.i(TAG, "onResponse : " + response.body().toString());
+
+									// 수정하고 싶은 해당 아이템을 position 과 값을 설정하라
+									commentItemList.set(position, commentItemList.get(position));
+
+									// 수정한 아이템을 갱신해라
+									commentAdapter.notifyItemChanged(position);
+
+									DetailComment.setText("");
+
+									CommentModifyBtn.setVisibility(View.GONE);
+									CommentBtn.setVisibility(View.VISIBLE);
+
+								}
+
+								@Override
+								public void onFailure(Call<String> call, Throwable throwable) {
+									Log.i("onFailure", "" + throwable);
+									Toast.makeText(ReviewDetailActivity.this, "onFailure / " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+								}
+							}); // enqueue 끝
+						}
+					});
+
+				} else {
+					Log.i(TAG, "어댑터에서 가져온 태그 값 없어요");
+				}
+			}
+		});
+
+		// 리사이클러뷰에 어댑터 설정
 		commentRecyclerView.setAdapter(commentAdapter);
 
 		// 쉐어드에 저장된 사용자 이름 가져오기 기능
@@ -235,7 +307,7 @@ public class ReviewDetailActivity extends AppCompatActivity {
 			}
 		}); // 편집 이미지 클릭 이벤트 끝
 
-		DetailCommentBtn.setOnClickListener(new View.OnClickListener() {
+		CommentBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				commentInsert();
@@ -267,7 +339,7 @@ public class ReviewDetailActivity extends AppCompatActivity {
 			ApiService apiService = retroClient.getApiClient().create(ApiService.class);
 
 			// 인터페이스 ApiService에 선언한 commentInsert()를 호출합니다
-			Call<String> call = apiService.commentInsert(commentData.getcommentEmail(), commentData.getplaceNum(), commentData.getcommentData());
+			Call<String> call = apiService.commentInsert(commentData.getcommentEmail(), commentData.getplaceNum(), commentData.getcommentData(), sessionName);
 
 			call.enqueue(new Callback<String>() {
 				@Override
@@ -361,6 +433,7 @@ public class ReviewDetailActivity extends AppCompatActivity {
 
 	// 쉐어드에 저장된 사용자 이름 가져오기 기능 (세션 활용)
 	public void getShard() {
+
 		SharedPreferences sharedPreferences = getSharedPreferences("sessionName", MODE_PRIVATE);
 		sessionName = sharedPreferences.getString("name", "noName");
 		sessionEmail = sharedPreferences.getString("email", "noName");
@@ -415,6 +488,7 @@ public class ReviewDetailActivity extends AppCompatActivity {
 		String TAG_EMAIL = "email";
 		String TAG_TIME = "time";
 		String TAG_COMMENT = "comment";
+		String TAG_WRITER = "writer";
 
 
 		try {
@@ -433,12 +507,15 @@ public class ReviewDetailActivity extends AppCompatActivity {
 				String commentEmail = item.getString(TAG_EMAIL);
 				String commentTime = item.getString(TAG_TIME);
 				String comment = item.getString(TAG_COMMENT);
+				String writer = item.getString(TAG_WRITER);
 
 				Log.i(TAG, "반복문 : 실행");
+
 				Log.i(TAG, i + "/ 댓글 고유 번호 : " + commentNum + "/ 리뷰 번호 : " + placeNum + "/ 댓글 작성한 사용자 이메일 : " + commentEmail + "/ 댓글 작성한 날짜 : " + commentTime + "/ 댓글 내용 : " + comment);
+				Log.i(TAG, "쉐어드에 저장된 사용자 이름 : " + sessionName);
 
 				// 어댑터에 전달할 데이터 추가
-				commentItemList.add(new CommentItem(commentNum, placeNum, commentEmail, commentTime, comment));
+				commentItemList.add(new CommentItem(commentNum, placeNum, commentEmail, commentTime, comment, writer));
 				// 어댑터에게 새로 삽입된 아이템이 있다는걸 알려준다
 				commentAdapter.notifyItemInserted(0);
 			}

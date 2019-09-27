@@ -38,6 +38,7 @@
         <activity android:name=".Activity.ReviewDetailActivity"></activity>
         <activity android:name=".Activity.ReviewModifyActivity"></activity>
         <activity android:name=".Activity.CalendarActivity"></activity>
+        <activity android:name=".Activity.SearchActivity"></activity>
 
 
 

@@ -61,10 +61,8 @@ public class MainActivity extends AppCompatActivity {
 	private RecyclerView.LayoutManager mainLayoutManager;
 	private String mainJsonString;
 
-	ImageView Home;
+	ImageView Home, Search;
 	TextView reviewRegister, main_fragment_date, main_fragment_score;
-
-	private boolean isFragment = true;
 
 	// 메인 아이템 리스트
 	private static ArrayList<MainItem> mainItemList;
@@ -76,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
 		reviewRegister = findViewById(R.id.ReviewRegisterText);
 		Home = findViewById(R.id.Home);
+		Search = findViewById(R.id.Search);
 		main_fragment_date = findViewById(R.id.main_fragment_date);
 		main_fragment_score = findViewById(R.id.main_fragment_score);
 
@@ -155,12 +154,6 @@ public class MainActivity extends AppCompatActivity {
 		} // 인텐트 데이터 수신 조건 끝
 
 
-//		FragmentManager fragmentManager = getSupportFragmentManager();
-//		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//		fragmentTransaction.add(R.id.main_recycler_view, new MainDateFragment());
-//		fragmentTransaction.commit();
-
-
 	} // onCreate() 끝
 
 	@Override
@@ -209,6 +202,15 @@ public class MainActivity extends AppCompatActivity {
 			public void onClick(View v) {
 				Intent mainIntent = new Intent(MainActivity.this, MainActivity.class);
 				startActivity(mainIntent);
+				finish();
+			}
+		});
+
+		Search.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent searchIntent = new Intent(MainActivity.this, SearchActivity.class);
+				startActivity(searchIntent);
 				finish();
 			}
 		});
@@ -428,22 +430,5 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 	} // showResult() 끝
-
-	public void switchFragment() {
-		Fragment newFragment;
-
-		if (isFragment) {
-			newFragment = new MainDateFragment();
-		} else {
-			newFragment = new MainScoreFragment();
-		}
-
-		isFragment = (isFragment) ? false : true;
-
-		FragmentManager fragmentManager = getSupportFragmentManager();
-		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-		fragmentTransaction.replace(R.id.main_recycler_view, newFragment);
-		fragmentTransaction.commit();
-	}
 
 } // MainActivity 클래스 끝

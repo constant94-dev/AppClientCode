@@ -52,10 +52,13 @@ public interface ApiService {
 
 	@FormUrlEncoded
 	@POST("/commentInsert.php")
-	Call<String> commentInsert(@Field("userEmail") String UserEmail, @Field("placeNum") String placeNum, @Field("commentData") String commentData);
+	Call<String> commentInsert(@Field("userEmail") String UserEmail, @Field("placeNum") String placeNum, @Field("commentData") String commentData, @Field("writer") String writer);
 
 	@GET("/commentSelect.php")
 	Call<String> commentSelect(@Query("placeNum") String placeNum);
+
+	@GET("/commentUpdate.php")
+	Call<String> commentUpdate(@Query("commentNum") String commentNum, @Query("commentData") String commentData);
 
 	@GET("/commentDelete.php")
 	Call<String> commentDelete(@Query("commentNum") String commentNum);
@@ -72,6 +75,9 @@ public interface ApiService {
 	@GET("/reviewDelete.php")
 	Call<String> reviewDelete(@Query("placeNum") String placeNum);
 
+	@GET("/reviewSearch.php")
+	Call<JsonObject> reviewSearch(@Query("keyword") String searchKeyWord);
+
 
 	// @Multipart -> 요청 본문이 여러 부분이 있다 @Part 주석을 달아야한다
 	// @Part -> Multipart 요청의 단일 부분을 나타낸다
@@ -85,7 +91,5 @@ public interface ApiService {
 	@Multipart
 	@POST("/multiUploadImage.php")
 	Call<String> multiUploadImage(@Part ArrayList<MultipartBody.Part> files, @Part("totalFiles") RequestBody totalFiles);
-
-
 
 } // ApiService 인터페이스 끝
