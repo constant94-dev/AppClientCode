@@ -78,6 +78,11 @@ public interface ApiService {
 	@GET("/reviewSearch.php")
 	Call<JsonObject> reviewSearch(@Query("keyword") String searchKeyWord);
 
+	@GET("/profileSelect.php")
+	Call<String> profileSelect(@Query("profileEmail") String profileEmail);
+
+	@GET("/chatSearch.php")
+	Call<String> chatSearch(@Query("email") String email);
 
 	// @Multipart -> 요청 본문이 여러 부분이 있다 @Part 주석을 달아야한다
 	// @Part -> Multipart 요청의 단일 부분을 나타낸다
@@ -86,10 +91,12 @@ public interface ApiService {
 	// String, Image, int -> 주석에 부품이름이 필요하다
 	@Multipart
 	@POST("/uploadImage.php")
-	Call<String> uploadImage(@Part MultipartBody.Part file, @Part("name") RequestBody requestBody);
+	Call<String> uploadImage(@Part MultipartBody.Part file, @Part("name") RequestBody requestBody, @Part("profileName") String profileName, @Part("profileEmail") String profileEmail);
 
 	@Multipart
 	@POST("/multiUploadImage.php")
 	Call<String> multiUploadImage(@Part ArrayList<MultipartBody.Part> files, @Part("totalFiles") RequestBody totalFiles);
+
+
 
 } // ApiService 인터페이스 끝

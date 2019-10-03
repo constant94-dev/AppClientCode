@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
@@ -35,6 +36,7 @@ public class SearchActivity extends AppCompatActivity {
 
 	ImageView SearchBack, SearchImg;
 	EditText SearchContent;
+	TextView SearchNo;
 
 	private RecyclerView searchRecyclerView;
 	private RecyclerView.Adapter searchAdapter;
@@ -54,6 +56,7 @@ public class SearchActivity extends AppCompatActivity {
 		SearchBack = findViewById(R.id.SearchBack);
 		SearchImg = findViewById(R.id.SearchImg);
 		SearchContent = findViewById(R.id.SearchContent);
+		SearchNo = findViewById(R.id.SearchNo);
 
 
 	}
@@ -121,7 +124,12 @@ public class SearchActivity extends AppCompatActivity {
 						searchRecyclerView.setAdapter(searchAdapter);
 
 						searchJsonString = response.body().toString();
-						showResult();
+
+						if (searchJsonString.contains("null")) {
+							SearchNo.setText("검색 결과가 없습니다.");
+						} else {
+							showResult();
+						}
 
 
 					}

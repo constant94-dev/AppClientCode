@@ -39,7 +39,10 @@
         <activity android:name=".Activity.ReviewModifyActivity"></activity>
         <activity android:name=".Activity.CalendarActivity"></activity>
         <activity android:name=".Activity.SearchActivity"></activity>
-
+        <activity android:name=".Activity.ChatActivity"></activity>
+        <activity android:name=".Activity.ChatSearchActivity"></activity>
+        <activity android:name=".Activity.ChatRoomActivity"></activity>
+        <activity android:name=".Activity.ProfileActivity"></activity>
 
 
     </application>

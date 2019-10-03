@@ -376,21 +376,21 @@ public class ReviewModifyActivity extends AppCompatActivity {
 		Log.i(TAG, "description : " + description);
 
 		// 인터페이스 ApiService에 선언한 uploadImage()를 호출합니다
-		Call<String> call = apiService.uploadImage(part, description);
-		call.enqueue(new Callback<String>() {
-			@Override
-			public void onResponse(Call<String> call, Response<String> response) {
-				Log.i(TAG, "onResponse : 실행");
-				Log.i(TAG, "서버에서 받은 응답 값 : " + response.body().toString());
-				ServerImagePath += response.body().toString();
-			}
-
-			@Override
-			public void onFailure(Call<String> call, Throwable throwable) {
-				Log.i("onFailure", "" + throwable);
-				Toast.makeText(ReviewModifyActivity.this, "onFailure / " + throwable.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		});
+//		Call<String> call = apiService.uploadImage(part, description);
+//		call.enqueue(new Callback<String>() {
+//			@Override
+//			public void onResponse(Call<String> call, Response<String> response) {
+//				Log.i(TAG, "onResponse : 실행");
+//				Log.i(TAG, "서버에서 받은 응답 값 : " + response.body().toString());
+//				ServerImagePath += response.body().toString();
+//			}
+//
+//			@Override
+//			public void onFailure(Call<String> call, Throwable throwable) {
+//				Log.i("onFailure", "" + throwable);
+//				Toast.makeText(ReviewModifyActivity.this, "onFailure / " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+//			}
+//		});
 	} // 서버에 이미지 업로드 기능 끝
 
 	// 서버로 전달할 멀티 이미지 업로드 기능

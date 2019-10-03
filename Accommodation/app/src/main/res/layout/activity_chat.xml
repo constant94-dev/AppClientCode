@@ -10,80 +10,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorBlue"
-        android:gravity="right"
         android:orientation="horizontal"
         android:weightSum="1">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="100dp"
-            android:layout_weight="0.9"
-            android:gravity="right"
-            android:padding="10dp"
-            android:text="리뷰"
-            android:textColor="@color/colorWhite"
-            android:textSize="30sp" />
-
-        <TextView
-            android:id="@+id/ReviewRegisterText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.1"
+            android:layout_weight="1"
             android:gravity="center"
             android:padding="10dp"
-            android:text="등록"
+            android:text="채팅방 목록"
             android:textColor="@color/colorWhite"
             android:textSize="30sp" />
 
-
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/LinearSecond"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="5dp"
-        android:gravity="left"
-        android:orientation="horizontal"
-        android:weightSum="1">
-
-        <TextView
-            android:id="@+id/main_fragment_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.1"
-            android:text="최신순"
-            android:textColor="@color/colorBlue"
-            android:textSize="30sp" />
-
-        <TextView
-            android:id="@+id/main_fragment_score"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.1"
-            android:text="평점순"
-            android:textSize="30sp" />
-
-    </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/LinearThird"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorBackGray"
         android:orientation="vertical"
         android:weightSum="1">
 
-
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/main_recycler_view"
+            android:id="@+id/chat_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1">
 
+        </android.support.v7.widget.RecyclerView>
+
+        <ImageView
+            android:id="@+id/chatAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:layout_margin="10dp"
+            android:src="@drawable/add_circle" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -129,5 +92,6 @@
         </LinearLayout>
 
     </LinearLayout>
+
 
 </LinearLayout>

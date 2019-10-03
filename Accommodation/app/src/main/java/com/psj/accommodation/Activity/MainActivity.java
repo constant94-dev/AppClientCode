@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 	private RecyclerView.LayoutManager mainLayoutManager;
 	private String mainJsonString;
 
-	ImageView Home, Search;
+	ImageView Home, Search, Chat, MyProfile;
 	TextView reviewRegister, main_fragment_date, main_fragment_score;
 
 	// 메인 아이템 리스트
@@ -75,10 +77,13 @@ public class MainActivity extends AppCompatActivity {
 		reviewRegister = findViewById(R.id.ReviewRegisterText);
 		Home = findViewById(R.id.Home);
 		Search = findViewById(R.id.Search);
+		Chat = findViewById(R.id.Chat);
+		MyProfile = findViewById(R.id.MyProfile);
 		main_fragment_date = findViewById(R.id.main_fragment_date);
 		main_fragment_score = findViewById(R.id.main_fragment_score);
 
 		Log.i(TAG, "onCreate : 실행");
+
 
 		// ArrayList 객체 생성
 		mainItemList = new ArrayList<>();
@@ -214,6 +219,25 @@ public class MainActivity extends AppCompatActivity {
 				finish();
 			}
 		});
+
+		Chat.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent chatIntent = new Intent(MainActivity.this, ChatActivity.class);
+				startActivity(chatIntent);
+				finish();
+			}
+		});
+
+		MyProfile.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent profileIntent = new Intent(MainActivity.this, ProfileActivity.class);
+				startActivity(profileIntent);
+				finish();
+			}
+		});
+
 
 		// 등록 눌렀을 때
 		reviewRegister.setOnClickListener(new View.OnClickListener() {
