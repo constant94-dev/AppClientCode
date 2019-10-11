@@ -38,21 +38,21 @@ public class ChatSearchActivity extends AppCompatActivity {
 	public static final String TAG = "ChatSearchActivity";
 
 	EditText UserSearch;
-	Button SearchBtn, InviteBtn;
+	Button SearchBtn, InviteBtn, InviteResultBtn;
 	ImageView InviteImage, UserSearchCancel;
 	TextView InviteName;
 
-	private RecyclerView searchRecyclerView;
-	private RecyclerView.Adapter searchAdapter;
-	private RecyclerView.LayoutManager searchLayoutManager;
+	private RecyclerView chatSearchRecyclerView;
+	private RecyclerView.Adapter chatSearchAdapter;
+	private RecyclerView.LayoutManager chatSearchLayoutManager;
 
-	// 검색 아이템 리스트
-	private static ArrayList<ChatSearchItem> searchItemList = null;
 
 	String sessionName = "";
 	String sessionEmail = "";
 
 	String[] searchUser;
+
+	ArrayList<ChatSearchItem> chatSearchItemList;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,24 +66,26 @@ public class ChatSearchActivity extends AppCompatActivity {
 		InviteBtn = findViewById(R.id.InviteBtn);
 		InviteImage = findViewById(R.id.InviteImage);
 		InviteName = findViewById(R.id.InviteName);
-		searchRecyclerView = findViewById(R.id.chatSearch_recycler_view);
+		InviteResultBtn = findViewById(R.id.InviteResultBtn);
 
+		chatSearchRecyclerView = findViewById(R.id.chatSearch_recycler_view);
+
+		// 쉐어드에 저장된 정보 가져오기 (이름, 이메일)
 		getShard();
 
-		// ArrayList 객체 생성
-		searchItemList = new ArrayList<>();
+		chatSearchItemList = new ArrayList<>();
 
-		searchLayoutManager = new LinearLayoutManager(getApplicationContext());
-		((LinearLayoutManager) searchLayoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
-		searchRecyclerView.setLayoutManager(searchLayoutManager);
-
-		// Adapter 셋팅
-		searchRecyclerView.setHasFixedSize(true); // 옵션
-		searchAdapter = new ChatSearchAdapter(getApplicationContext(), searchItemList);
-		searchRecyclerView.setAdapter(searchAdapter);
-
+		chatSearchLayoutManager = new LinearLayoutManager(this);
+		((LinearLayoutManager) chatSearchLayoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
+		chatSearchRecyclerView.setLayoutManager(chatSearchLayoutManager);
 
 	} // onCreate 끝
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		Log.i(TAG, "onStart : 실행");
+	}
 
 	@Override
 	protected void onResume() {
@@ -94,17 +96,19 @@ public class ChatSearchActivity extends AppCompatActivity {
 		UserSearchCancel.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent chatIntent = new Intent(ChatSearchActivity.this, ChatActivity.class);
+				Log.i(TAG, "취소 이미지 클릭");
+
+				Intent chatIntent = new Intent(ChatSearchActivity.this, ChatRoomActivity.class);
 				startActivity(chatIntent);
 				finish();
 			}
 		});
 
-		// 검색 버튼 클릭 이벤트
+		// 검색 버튼 클릭 이벤트 시작
 		SearchBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Log.i(TAG, "친구검색....");
+				Log.i(TAG, "친구검색 버튼 클릭");
 
 				Log.i(TAG, "검색할 이메일 : " + UserSearch.getText().toString());
 
@@ -122,6 +126,7 @@ public class ChatSearchActivity extends AppCompatActivity {
 						Log.i(TAG, "onResponse : 실행");
 						Log.i(TAG, "서버에서 받은 응답 값 : " + response.body().toString());
 
+						// searchUser[0] -> 이름 / searchUser[1] -> 이미지 경로 / searchUser[2] -> 이메일
 						searchUser = response.body().split(" ");
 
 						if (response.body().equals("유저없음")) {
@@ -137,17 +142,20 @@ public class ChatSearchActivity extends AppCompatActivity {
 							InviteName.setText("본인은 초대할 수 없습니다");
 						} else {
 
+							Log.i(TAG, "초대 가능한 유저 입니다");
+
 							InviteImage.setBackground(new ShapeDrawable(new OvalShape()));
 							if (Build.VERSION.SDK_INT >= 21) {
 								InviteImage.setClipToOutline(true);
 							}
 
-							Glide.with(ChatSearchActivity.this).load("http://54.180.152.167/" + searchUser[1]).centerCrop().into(InviteImage);
-							InviteName.setText(searchUser[0]);
-
 							InviteName.setVisibility(View.VISIBLE);
 							InviteImage.setVisibility(View.VISIBLE);
 							InviteBtn.setVisibility(View.VISIBLE);
+
+							Glide.with(ChatSearchActivity.this).load("http://54.180.152.167/" + searchUser[1]).centerCrop().into(InviteImage);
+							InviteName.setText(searchUser[0]);
+
 
 						}
 
@@ -164,47 +172,105 @@ public class ChatSearchActivity extends AppCompatActivity {
 			}
 		}); // 검색 버튼 클릭 이벤트 끝
 
-		// 친구 초대 버튼 클릭 이벤트
+		// 친구 초대 버튼 클릭 이벤트 시작
 		InviteBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				Log.i(TAG, "친구초대 버튼 클릭");
 
-				int invite = 0;
-
-				if (searchItemList != null){
-					// 초대 중복 방지를 위한 반복문 시작
-					for (int i = 0; i < searchItemList.size(); i++) {
-						if (searchItemList.get(i).getChatSearchEmail().equals(searchUser[2])) {
-							Log.i(TAG, "초대 목록에 있습니다");
-							Toast.makeText(ChatSearchActivity.this, "초대 목록에 있습니다", Toast.LENGTH_SHORT).show();
-							invite = 1;
-
-						}
-					} // 초대 중복 방지를 위한 반복문 끝
-				} // 초대 목록 중복일때 중복 끝
-
-
-
-				Log.i(TAG, "초대 목록에 없습니다 : " + invite);
-
-				if (invite == 0) {
-
-
-
-					Log.i(TAG, "초대 목록에 없습니다");
-					// searchUser[0] -> 이름 / searchUser[1] -> 이미지 경로 / searchUser[2] -> 이메일
-					searchItemList.add(0, new ChatSearchItem(searchUser[1], searchUser[2], searchUser[0]));
-
-					searchAdapter.notifyItemInserted(0);
-
-
-				} // 초대 목록 중복 아닐때 조건 끝
+				getInvite();
 
 
 			}
 		}); // 친구 초대 버튼 클릭 이벤트 끝
 
+		InviteResultBtn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Log.i(TAG, "초대완료 버튼 클릭");
+
+				// 채팅방 목록 화면으로 이동할 때 초대한 사용자 정보(이름,이메일,이미지) 전달
+				for (int i = 0; i < chatSearchItemList.size(); i++) {
+					Log.i(TAG, i + " 번째 전달할 이메일 : " + chatSearchItemList.get(i).getChatSearchEmail());
+					Log.i(TAG, i + " 번째 전달할 이름 : " + chatSearchItemList.get(i).getChatSearchName());
+					Log.i(TAG, i + " 번째 전달할 이미지 : " + chatSearchItemList.get(i).getChatSearchImage());
+				}
+
+				Intent chatIntent = new Intent(ChatSearchActivity.this, ChatRoomActivity.class);
+				chatIntent.putExtra("chatSearchItem", chatSearchItemList);
+				startActivity(chatIntent);
+				finish();
+			}
+		});
+
 	} // onResume 끝
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.i(TAG, "onPause : 실행");
+
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.i(TAG, "onStop : 실행");
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.i(TAG, "onDestroy : 실행");
+	}
+
+	// 초대할 사용자 리사이클러뷰에 출력 기능
+	public void getInvite() {
+
+		Log.i(TAG, "getInvite : 실행");
+
+		Log.i(TAG, "초대할 사용자 리사이클러뷰 출력 시작 ~~");
+
+
+		ChatSearchItem chatSearchItem = new ChatSearchItem();
+
+		// 전역변수 searchUser[0] -> 이름 / searchUser[1] -> 이미지 경로 / searchUser[2] -> 이메일
+		chatSearchItem.setChatSearchEmail(searchUser[2]);
+		chatSearchItem.setChatSearchImage(searchUser[1]);
+		chatSearchItem.setChatSearchName(searchUser[0]);
+
+		// 중복 초대 체크 변수
+		int overlap = 0;
+
+		// 초대한 사용자 중복 없애기 위한 반복문 시작
+		for (int i = 0; i < chatSearchItemList.size(); i++) {
+			// 초대한 사용자 중복 없애기 위한 조건 시작
+			if (chatSearchItemList.get(i).getChatSearchEmail().equals(chatSearchItem.getChatSearchEmail())) {
+				Log.i(TAG, "초대한 사용자가 이미 목록에 존재해요 ~~");
+				Toast.makeText(this, "초대 목록에 있는 사용자 입니다", Toast.LENGTH_SHORT).show();
+				overlap = 1;
+			}
+			//Log.i(TAG, "초대한 사용자가 목록에 없어요 ~~");
+		} // 초대한 사용자 중복 없애기 위한 반복문 끝
+
+
+		if (overlap == 0) {
+			chatSearchItemList.add(chatSearchItem);
+			Log.i(TAG, "어댑터에 전달할 유저 정보 사이즈 : " + chatSearchItemList.size());
+
+			Log.i(TAG, "초대할 사용자 리사이클러뷰 출력 시작 ~~");
+			chatSearchAdapter = new ChatSearchAdapter(this, chatSearchItemList);
+			chatSearchRecyclerView.setAdapter(chatSearchAdapter);
+
+			// 채팅 초대 리스트를 추가 하고 어댑터에 전달한 후에 어댑터 전달된 데이터가 변경된것을 알림
+			chatSearchAdapter.notifyDataSetChanged();
+		}
+
+		Log.i(TAG, "초대할 사용자 리사이클러뷰 출력 끝 ~~");
+
+		// 한명 이상 초대한 사용자가 있을 때 버튼 활성화
+		InviteResultBtn.setVisibility(View.VISIBLE);
+	}
 
 	// 쉐어드에 저장된 사용자 이름 가져오기 기능 (세션 활용)
 	public void getShard() {
@@ -213,4 +279,4 @@ public class ChatSearchActivity extends AppCompatActivity {
 		sessionEmail = sharedPreferences.getString("email", "noEmail");
 	} // getShard 끝
 
-} // ChatActivity 클래스 끝
+} // ChatSearchActivity 클래스 끝

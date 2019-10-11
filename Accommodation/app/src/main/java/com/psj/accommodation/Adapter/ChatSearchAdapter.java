@@ -27,7 +27,7 @@ public class ChatSearchAdapter extends RecyclerView.Adapter<ChatSearchAdapter.Vi
 	public static final String TAG = "ChatSearchAdapter";
 	public Context searchContext;
 	// item class(MainItem)를 정의해 놓았음
-	private ArrayList<ChatSearchItem> searchData;
+	private ArrayList<ChatSearchItem> chatSearchData;
 
 	// 서버 경로
 	String ServerImagePath = "http://54.180.152.167/";
@@ -57,7 +57,7 @@ public class ChatSearchAdapter extends RecyclerView.Adapter<ChatSearchAdapter.Vi
 
 	// 생성자 - 넘어 오는 데이터타입에 유의해야 한다.
 	public ChatSearchAdapter(Context searchContext, ArrayList<ChatSearchItem> searchDataSet) {
-		this.searchData = searchDataSet;
+		this.chatSearchData = searchDataSet;
 		this.searchContext = searchContext;
 
 	}
@@ -79,19 +79,19 @@ public class ChatSearchAdapter extends RecyclerView.Adapter<ChatSearchAdapter.Vi
 		// get element from your dataset at this position
 		// replace the contents of the view with that element
 
-		Log.i(TAG, "초대 유저 이미지 : " + searchData.get(position).getChatSearchImage());
-		Log.i(TAG, "초대 유저 이름 : " + searchData.get(position).getChatSearchName());
-		Log.i(TAG, "초대 유저 이메일 : " + searchData.get(position).getChatSearchEmail());
+		Log.i(TAG, "초대 유저 이미지 : " + chatSearchData.get(position).getChatSearchImage());
+		Log.i(TAG, "초대 유저 이름 : " + chatSearchData.get(position).getChatSearchName());
+		Log.i(TAG, "초대 유저 이메일 : " + chatSearchData.get(position).getChatSearchEmail());
 
 
-		Glide.with(searchContext).load("http://54.180.152.167/" + searchData.get(position).getChatSearchImage()).centerCrop().into(viewHolder.chatSearchItemImage);
-		viewHolder.chatSearchItemName.setText(searchData.get(position).getChatSearchName());
+		Glide.with(searchContext).load("http://54.180.152.167/" + chatSearchData.get(position).getChatSearchImage()).centerCrop().into(viewHolder.chatSearchItemImage);
+		viewHolder.chatSearchItemName.setText(chatSearchData.get(position).getChatSearchName());
 
 	}
 
 	// 리사이클러뷰 보여줄 행 개수 리턴
 	@Override
 	public int getItemCount() {
-		return searchData.size();
+		return chatSearchData.size();
 	}
 }

@@ -379,4 +379,4 @@ public class ProfileActivity extends AppCompatActivity {
 		return "com.android.providers.media.documents".equals(uri.getAuthority());
 	}
 
-} // ChatActivity 클래스 끝
+} // ProfileActivity 클래스 끝

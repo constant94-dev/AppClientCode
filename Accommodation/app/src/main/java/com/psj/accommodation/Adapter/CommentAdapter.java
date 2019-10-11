@@ -38,7 +38,7 @@ import static android.content.Context.MODE_PRIVATE;
 // TODO MainActivity -> MainAdapter -> MainActivity
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder> {
 
-	public static final String TAG = "MainAdapter";
+	public static final String TAG = "CommentAdapter";
 	public Context detailContext;
 	// item class(MainItem)를 정의해 놓았음
 	private ArrayList<CommentItem> commentData;

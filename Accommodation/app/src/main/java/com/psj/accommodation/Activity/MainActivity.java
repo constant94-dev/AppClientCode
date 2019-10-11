@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
 		Chat.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Intent chatIntent = new Intent(MainActivity.this, ChatActivity.class);
+				Intent chatIntent = new Intent(MainActivity.this, ChatRoomActivity.class);
 				startActivity(chatIntent);
 				finish();
 			}
