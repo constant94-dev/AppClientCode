@@ -1,10 +1,12 @@
 package com.psj.accommodation.Adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +52,7 @@ public class ChattingAdapter extends RecyclerView.Adapter<ChattingAdapter.ViewHo
 			LinearItemAccess = v.findViewById(R.id.LinearItemAccess);
 			chatAccessUser = v.findViewById(R.id.chatAccessUser);
 
+
 		}
 	}
 
@@ -93,8 +96,18 @@ public class ChattingAdapter extends RecyclerView.Adapter<ChattingAdapter.ViewHo
 
 			Log.i(TAG, "어댑터 세팅 데이터 이름 : " + nameCheck.toString());
 			Log.i(TAG, "어댑터 세팅 데이터 내용 : " + contentCheck.toString());
+			Log.i(TAG, "어댑터 세팅 데이터 self : " + chattingData.get(position).getChatSelf());
 			viewHolder.LinearItemAccess.setVisibility(View.GONE);
 			viewHolder.LinearItemBody.setVisibility(View.VISIBLE);
+
+			if (chattingData.get(position).getChatSelf() == 1) {
+				LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) viewHolder.LinearItemBody.getLayoutParams();
+
+				layoutParams.gravity = Gravity.RIGHT;
+
+				viewHolder.LinearItemBody.setLayoutParams(layoutParams);
+			}
+
 
 			String[] nameSplit = chattingData.get(position).getChatName().split(":");
 
@@ -112,4 +125,6 @@ public class ChattingAdapter extends RecyclerView.Adapter<ChattingAdapter.ViewHo
 	public int getItemCount() {
 		return chattingData.size();
 	}
+
+
 }

@@ -1,14 +1,21 @@
 package com.psj.accommodation.Activity;
 
 import android.annotation.TargetApi;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -38,6 +45,7 @@ import com.psj.accommodation.Fragment.MainDateFragment;
 import com.psj.accommodation.Fragment.MainScoreFragment;
 import com.psj.accommodation.Interface.ApiService;
 import com.psj.accommodation.R;
+import com.psj.accommodation.Service.ChatService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,6 +76,61 @@ public class MainActivity extends AppCompatActivity {
 
 	// 메인 아이템 리스트
 	private static ArrayList<MainItem> mainItemList;
+
+	Messenger serviceMessenger;
+	boolean isChatService = false; // 서비스 중인지 확인용 변수
+
+	// LoginActivityHandler 클래스 시작
+	class MainActivityHandler extends Handler {
+
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+
+			Log.i(TAG, "서비스에서 응답 왔다 msg.what : " + msg.what);
+
+			switch (msg.what) {
+				case ChatService.SET_SOCKET:
+					serviceMessenger = msg.replyTo;
+					Toast.makeText(MainActivity.this, "서비스에서 소켓 접속 응답 받음", Toast.LENGTH_SHORT).show();
+					break;
+
+			}
+
+		}
+	} // LoginActivityHandler 클래스 끝
+
+	// 핸들러 wrapping 한 메시지 객체
+	Messenger MainActivityMessenger = new Messenger(new MainActivityHandler());
+
+	ServiceConnection serviceConn = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			// 서비스와 연결되었을 때 호출되는 메서드
+			Log.i(TAG, "onServiceConnected : 실행");
+
+//			try {
+//				serviceMessenger = new Messenger(service);
+//
+//				Message r_msg = Message.obtain(null, ChatService.RECEIVE_THREAD);
+//				r_msg.replyTo = loginActivityMessenger;
+//				serviceMessenger.send(r_msg);
+//
+//
+//			} catch (RemoteException e) {
+//				e.printStackTrace();
+//			}
+
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			// 서비스와 연결이 끊어졌을 때 호출되는 메서드
+			Log.i(TAG, "onServiceDisconnected : 실행");
+
+			isChatService = false;
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +220,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 		} // 인텐트 데이터 수신 조건 끝
+
+		//bindServiceStart();
 
 
 	} // onCreate() 끝
@@ -455,4 +520,14 @@ public class MainActivity extends AppCompatActivity {
 
 	} // showResult() 끝
 
+	public void bindServiceStart() {
+		Intent bindIntent = new Intent(MainActivity.this, ChatService.class); // 다음넘어갈 컴포넌트 정의
+		isChatService = bindService(bindIntent, serviceConn, Context.BIND_AUTO_CREATE); // 인텐트,서비스연결객체,플래그 전달 --> 서비스 연결
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+
+	}
 } // MainActivity 클래스 끝

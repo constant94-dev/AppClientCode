@@ -1,11 +1,19 @@
 package com.psj.accommodation.Activity;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,9 +31,15 @@ import com.google.gson.JsonObject;
 import com.psj.accommodation.Adapter.ChatSearchAdapter;
 import com.psj.accommodation.Adapter.SearchAdapter;
 import com.psj.accommodation.Data.ChatSearchItem;
+import com.psj.accommodation.Data.ChattingItem;
 import com.psj.accommodation.Data.SearchItem;
 import com.psj.accommodation.Interface.ApiService;
 import com.psj.accommodation.R;
+import com.psj.accommodation.Service.ChatService;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -46,13 +60,63 @@ public class ChatSearchActivity extends AppCompatActivity {
 	private RecyclerView.Adapter chatSearchAdapter;
 	private RecyclerView.LayoutManager chatSearchLayoutManager;
 
-
+	String profileImage = "";
+	String profileName = "";
+	String profileEmail = "";
+	String profileJsonString = "";
 	String sessionName = "";
 	String sessionEmail = "";
+
+	String names = "";
+	String images = "";
 
 	String[] searchUser;
 
 	ArrayList<ChatSearchItem> chatSearchItemList;
+
+	Messenger serviceMessenger;
+	boolean isChatService = false; // 서비스 중인지 확인용 변수
+
+	// ChatSearchActivityHandler 클래스 시작
+	class ChatSearchActivityHandler extends Handler {
+
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+
+			Log.i(TAG, "서비스에서 응답 왔다 msg.what : " + msg.what);
+
+			switch (msg.what) {
+				case ChatService.SET_SOCKET:
+					serviceMessenger = msg.replyTo;
+					Toast.makeText(ChatSearchActivity.this, "서비스에서 소켓 접속 응답 받음", Toast.LENGTH_SHORT).show();
+					break;
+
+			}
+
+		}
+	} // ChatSearchActivityHandler 클래스 끝
+
+	// 핸들러 wrapping 한 메시지 객체
+	Messenger ChatSearchActivityMessenger = new Messenger(new ChatSearchActivityHandler());
+
+	ServiceConnection serviceConn = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			// 서비스와 연결되었을 때 호출되는 메서드
+			Log.i(TAG, "onServiceConnected : 실행");
+			serviceMessenger = new Messenger(service);
+
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			// 서비스와 연결이 끊어졌을 때 호출되는 메서드
+			Log.i(TAG, "onServiceDisconnected : 실행");
+
+			isChatService = false;
+		}
+	};
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,11 +137,17 @@ public class ChatSearchActivity extends AppCompatActivity {
 		// 쉐어드에 저장된 정보 가져오기 (이름, 이메일)
 		getShard();
 
+		// 본인 프로필 가져오기 기능
+		getSelfProfile();
+
 		chatSearchItemList = new ArrayList<>();
 
 		chatSearchLayoutManager = new LinearLayoutManager(this);
 		((LinearLayoutManager) chatSearchLayoutManager).setOrientation(LinearLayoutManager.HORIZONTAL);
 		chatSearchRecyclerView.setLayoutManager(chatSearchLayoutManager);
+
+		// 바인드 서비스 시작 기능
+		bindServiceStart();
 
 	} // onCreate 끝
 
@@ -184,24 +254,30 @@ public class ChatSearchActivity extends AppCompatActivity {
 			}
 		}); // 친구 초대 버튼 클릭 이벤트 끝
 
+		// 친구 초대 완료 버튼 클릭 이벤트 시작
 		InviteResultBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Log.i(TAG, "초대완료 버튼 클릭");
 
-				// 채팅방 목록 화면으로 이동할 때 초대한 사용자 정보(이름,이메일,이미지) 전달
+				// 채팅방 생성할 때 초대한 사용자 정보(이름,이메일,이미지) 확인
 				for (int i = 0; i < chatSearchItemList.size(); i++) {
 					Log.i(TAG, i + " 번째 전달할 이메일 : " + chatSearchItemList.get(i).getChatSearchEmail());
 					Log.i(TAG, i + " 번째 전달할 이름 : " + chatSearchItemList.get(i).getChatSearchName());
 					Log.i(TAG, i + " 번째 전달할 이미지 : " + chatSearchItemList.get(i).getChatSearchImage());
+
+					names += chatSearchItemList.get(i).getChatSearchName() + " ";
+					images += chatSearchItemList.get(i).getChatSearchImage() + " ";
 				}
 
-				Intent chatIntent = new Intent(ChatSearchActivity.this, ChatRoomActivity.class);
-				chatIntent.putExtra("chatSearchItem", chatSearchItemList);
-				startActivity(chatIntent);
-				finish();
+				images += profileImage;
+
+
+				insertChatRoom();
+
+
 			}
-		});
+		}); // 친구 초대 완료 버튼 클릭 이벤트 끝
 
 	} // onResume 끝
 
@@ -222,6 +298,21 @@ public class ChatSearchActivity extends AppCompatActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		Log.i(TAG, "onDestroy : 실행");
+
+		if (isChatService) {
+
+			Message msg = Message.obtain(null, ChatService.DISCONNECT);
+
+			try {
+				serviceMessenger.send(msg);
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
+			unbindService(serviceConn);
+			isChatService = false;
+		}
+
 	}
 
 	// 초대할 사용자 리사이클러뷰에 출력 기능
@@ -270,6 +361,109 @@ public class ChatSearchActivity extends AppCompatActivity {
 
 		// 한명 이상 초대한 사용자가 있을 때 버튼 활성화
 		InviteResultBtn.setVisibility(View.VISIBLE);
+	}
+
+	private void insertChatRoom() {
+
+		// 레트로핏 서버 URL 설정해놓은 객체 생성
+		RetroClient retroClient = new RetroClient();
+		// GET, POST 같은 서버에 데이터를 보내기 위해서 생성합니다
+		ApiService apiService = retroClient.getApiClient().create(ApiService.class);
+
+		// 인터페이스 ApiService에 선언한 chatRoomInsert()를 호출합니다
+		Call<String> call = apiService.chatRoomInsert(names, images, sessionName);
+
+		call.enqueue(new Callback<String>() {
+			@Override
+			public void onResponse(Call<String> call, Response<String> response) {
+				Log.i("onResponse : 실행", response.body().toString());
+				Toast.makeText(ChatSearchActivity.this, "서버에서 받은 응답 값 : ", Toast.LENGTH_LONG);
+
+				Intent chatIntent = new Intent(ChatSearchActivity.this, ChatRoomActivity.class);
+				chatIntent.putExtra("createRoomNames", names);
+				chatIntent.putExtra("createRoomImages", images);
+				startActivity(chatIntent);
+				finish();
+
+			} // onResponse 끝
+
+			@Override
+			public void onFailure(Call<String> call, Throwable throwable) {
+				Log.i("onFailure : 실행", " / " + throwable);
+				Toast.makeText(ChatSearchActivity.this, "onFailure / " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+			} // onFailure 끝
+
+		}); // enqueue 끝
+	} // insertChatRoom() 끝
+
+	public void getSelfProfile() {
+
+		// 레트로핏 서버 URL 설정해놓은 객체 생성
+		RetroClient retroClient = new RetroClient();
+		// GET, POST 같은 서버에 데이터를 보내기 위해서 생성합니다
+		ApiService apiService = retroClient.getApiClient().create(ApiService.class);
+
+		// 인터페이스 ApiService에 선언한 chatRoomList()를 호출합니다
+		Call<JsonObject> call = apiService.chattingGetProfile(sessionEmail);
+
+		call.enqueue(new Callback<JsonObject>() {
+			@Override
+			public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+				Log.i("onResponse : 실행", response.body().toString());
+				Toast.makeText(ChatSearchActivity.this, "서버에서 받은 응답 값 : ", Toast.LENGTH_LONG);
+
+				profileJsonString = response.body().toString();
+
+				selfProfileResult();
+			}
+
+			@Override
+			public void onFailure(Call<JsonObject> call, Throwable throwable) {
+				Log.i("onFailure : 실행", " / " + throwable);
+				Toast.makeText(ChatSearchActivity.this, "onFailure / " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		});
+	} // getSelfProfile() 끝
+
+	// 서버에서 json 형태로 가져온 값을 리사이클러뷰에 추가 시키는 방법
+	private void selfProfileResult() {
+
+		Log.i(TAG, "showResult : 실행");
+
+		String TAG_JSON = "result";
+		String TAG_EMAIL = "email";
+		String TAG_NAME = "name";
+		String TAG_IMAGE = "image";
+
+
+		try {
+			// 서버에서 가져온 json 데이터 처음 시작이 '{' 중괄호로 시작해서 JSONObject 에 담아준다
+			JSONObject jsonObject = new JSONObject(profileJsonString);
+			// JSONArray [ 대괄호로 시작하니 jsonObject 에서 get 한 값을 JSONArray 에 담아준다
+			JSONArray jsonArray = jsonObject.getJSONArray(TAG_JSON);
+
+			// 반복문을 이용하여 알맞게 풀어준다
+			for (int i = 0; i < jsonArray.length(); i++) {
+
+				JSONObject item = jsonArray.getJSONObject(i);
+
+				profileEmail = item.getString(TAG_EMAIL);
+				profileName = item.getString(TAG_NAME);
+				profileImage = item.getString(TAG_IMAGE);
+
+			}
+
+
+		} catch (JSONException e) {
+
+			Log.d(TAG, "showResult : ", e);
+		}
+
+	} // selfProfileResult() 끝
+
+	public void bindServiceStart() {
+		Intent bindIntent = new Intent(ChatSearchActivity.this, ChatService.class); // 다음넘어갈 컴포넌트 정의
+		isChatService = bindService(bindIntent, serviceConn, Context.BIND_AUTO_CREATE); // 인텐트,서비스연결객체,플래그 전달 --> 서비스 연결
 	}
 
 	// 쉐어드에 저장된 사용자 이름 가져오기 기능 (세션 활용)

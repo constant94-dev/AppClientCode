@@ -85,10 +85,10 @@ public interface ApiService {
 	Call<String> chatSearch(@Query("email") String email);
 
 	@GET("/chatRoomInsert.php")
-	Call<String> chatRoomInsert(@Query("names") String names, @Query("images") String images);
+	Call<String> chatRoomInsert(@Query("names") String names, @Query("images") String images, @Query("creator") String creator);
 
 	@GET("/chatRoomList.php")
-	Call<JsonObject> chatRoomList();
+	Call<JsonObject> chatRoomList(@Query("creator") String creator);
 
 	@GET("/chattingGetProfile.php")
 	Call<JsonObject> chattingGetProfile(@Query("chattingEmail") String chattingEmail);

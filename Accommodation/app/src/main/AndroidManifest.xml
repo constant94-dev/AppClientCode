@@ -44,6 +44,8 @@
         <activity android:name=".Activity.ChattingActivity"></activity>
         <activity android:name=".Activity.ProfileActivity"></activity>
 
+        <service android:name=".Service.ChatService"></service>
+
 
     </application>
 

@@ -11,7 +11,7 @@ public class ChattingItem {
 	private String chatImage;
 	private String chatContent;
 	private String chatAccess;
-
+	private int chatSelf;
 
 	public ChattingItem() {
 
@@ -25,13 +25,14 @@ public class ChattingItem {
 		this.chatContent = chatContent;
 	}
 
-	public ChattingItem(String chatNum, String chatAccess, String chatName, String chatImage, String chatContent) {
+	public ChattingItem(String chatNum, String chatAccess, String chatName, String chatImage, String chatContent, int chatSelf) {
 
 		this.chatNum = chatNum;
 		this.chatAccess = chatAccess;
 		this.chatImage = chatImage;
 		this.chatName = chatName;
 		this.chatContent = chatContent;
+		this.chatSelf = chatSelf;
 	}
 
 	public ChattingItem(String chatNum, String chatName, String chatImage) {
@@ -43,6 +44,15 @@ public class ChattingItem {
 	public ChattingItem(String chatName) {
 
 		this.chatName = chatName;
+	}
+
+	public int getChatSelf() {
+		return chatSelf;
+	}
+
+
+	public void setChatSelf(int chatSelf) {
+		this.chatSelf = chatSelf;
 	}
 
 	public String getChatContent() {

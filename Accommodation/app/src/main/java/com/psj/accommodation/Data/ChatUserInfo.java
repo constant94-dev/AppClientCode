@@ -1,11 +1,10 @@
 package com.psj.accommodation.Data;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 // TODO 검색 데이터 임시저장 클래스
 // TODO HTTP 통신을한 요청(request)에 대한 String 형태 응답(response)을 받기 위한 폼
-public class ChatSearchItem implements Serializable {
+public class ChatUserInfo implements Serializable {
 
 	private String chatSearchImage;
 	private String chatSearchEmail;
@@ -14,26 +13,21 @@ public class ChatSearchItem implements Serializable {
 	private String chatRoomNum;
 
 
-	public ChatSearchItem() {
+	public ChatUserInfo() {
 
 	}
 
-	public ChatSearchItem(String chatRoomContent) {
-		this.chatRoomContent = chatRoomContent;
-	}
-
-	public ChatSearchItem(String chatRoomNum, String chatSearchName, String chatSearchImage) {
+	public ChatUserInfo(String chatRoomNum, String chatSearchName, String chatSearchImage) {
 		this.chatRoomNum = chatRoomNum;
 		this.chatSearchName = chatSearchName;
 		this.chatSearchImage = chatSearchImage;
 
 	}
 
-	public ChatSearchItem(String chatSearchName, String chatSearchImage) {
+	public ChatUserInfo(String chatSearchName, String chatSearchImage) {
 
 		this.chatSearchName = chatSearchName;
 		this.chatSearchImage = chatSearchImage;
-
 	}
 
 	public String getChatRoomNum() {

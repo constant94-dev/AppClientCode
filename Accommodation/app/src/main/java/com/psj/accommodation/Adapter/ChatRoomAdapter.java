@@ -108,6 +108,9 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
 		String[] name = chatData.get(position).getChatSearchName().split(" ");
 		String[] image = chatData.get(position).getChatSearchImage().split(" ");
 
+		Log.i(TAG, "name -> " + name.length);
+		Log.i(TAG, "image -> " + image.length);
+
 		if (name.length == 1 && image.length == 1) {
 			Log.i(TAG, "채팅 초대 인원 1명 입니다");
 
@@ -160,8 +163,8 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
 
 
 		// 어댑터에 데이터를 액티비티로 전달하기 위해서 설정한 태그 값
-		viewHolder.rootView.setTag(position);
-		Log.i(TAG, "댓글 수정 아이템 태그 설정 값 : " + viewHolder.rootView.getTag());
+		viewHolder.rootView.setTag(chatData.get(position).getChatRoomNum());
+		Log.i(TAG, "채팅 방 아이템 태그 설정 값 : " + viewHolder.rootView.getTag());
 
 
 	}
