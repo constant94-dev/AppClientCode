@@ -14,6 +14,12 @@
         android:orientation="horizontal"
         android:padding="10dp">
 
+        <ImageView
+            android:id="@+id/chatRoomBack"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/keyboard_backspace_white"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

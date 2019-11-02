@@ -3,6 +3,7 @@ package com.psj.accommodation.Service;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -35,6 +36,8 @@ public class ChatService extends Service {
 	public static final int SEND_THREAD = 3;
 	public static final int CHATTING_SEND_THREAD = 4;
 	public static final int DISCONNECT = 0;
+	public static final int RECEIVE_CHATTING = 100;
+	public static final int RECEIVE_CHATROOM = 101;
 
 
 	// 서버 접속 여부를 판별하기 위한 변수
@@ -47,6 +50,8 @@ public class ChatService extends Service {
 	// Binder 객체는 IBinder 인터페이스 상속구현 객체입니다
 	// public class Binder extends Object implements IBinder
 	private IBinder iBinder = new MyBinder();
+
+	private static HashMap<Integer, Messenger> messengerHashMap = new HashMap<>();
 
 	String SendInfo = "";
 
@@ -62,23 +67,28 @@ public class ChatService extends Service {
 			switch (msg.what) {
 				case SET_SOCKET:
 					activityMessenger = msg.replyTo; // 액티비티로 부터 가져온 메시지 객체
-					Toast.makeText(ChatService.this, "소켓 접속 기능 시작", Toast.LENGTH_SHORT).show();
+					//Toast.makeText(ChatService.this, "소켓 접속 기능 시작", Toast.LENGTH_SHORT).show();
+					Log.i(TAG, "소켓 접속 스레드 액티비티 세팅 -> " + activityMessenger.toString());
 					setSocket();
 					break;
 				case RECEIVE_THREAD:
-					activityMessenger = msg.replyTo;
-					Toast.makeText(ChatService.this, "수신 스레드 기능 시작", Toast.LENGTH_SHORT).show();
+					//Toast.makeText(ChatService.this, "수신 스레드 기능 시작", Toast.LENGTH_SHORT).show();
 					receiveThread();
 					break;
 				case SEND_THREAD:
-					activityMessenger = msg.replyTo;
-					Toast.makeText(ChatService.this, "송신 스레드 기능 시작", Toast.LENGTH_SHORT).show();
+					//Toast.makeText(ChatService.this, "송신 스레드 기능 시작", Toast.LENGTH_SHORT).show();
 					SendInfo = msg.getData().getString("sendInfo");
 					sendThread();
 					break;
 				case DISCONNECT:
 					activityMessenger = null;
-					Toast.makeText(ChatService.this, "서비스 기능 종료", Toast.LENGTH_SHORT).show();
+					//Toast.makeText(ChatService.this, "서비스 기능 종료", Toast.LENGTH_SHORT).show();
+					break;
+				case RECEIVE_CHATTING:
+					activityMessenger = msg.replyTo;
+					Log.i(TAG, "수신 스레드에서 받은 데이터 전달을 위한 액티비티 세팅 -> " + activityMessenger.toString());
+					messengerHashMap.put(RECEIVE_CHATTING, msg.replyTo);
+					Log.i(TAG, "HashMap 에 저장한 액티비티 -> " + messengerHashMap.get(RECEIVE_CHATTING));
 					break;
 			}
 
@@ -114,7 +124,7 @@ public class ChatService extends Service {
 
 		Log.i(TAG, "onCreate 실행");
 
-		Toast.makeText(getApplicationContext(), "Service Created", Toast.LENGTH_SHORT).show();
+		//Toast.makeText(getApplicationContext(), "Service Created", Toast.LENGTH_SHORT).show();
 
 
 	}
@@ -190,13 +200,12 @@ public class ChatService extends Service {
 
 		Log.i(TAG, "receiveThread 실행!");
 
-		Log.i(TAG, "receiveThread 클라이언트 소켓 정보 : " + client_socket.toString());
-
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
 
+					Log.i(TAG, "receiveThread 클라이언트 소켓 정보 : " + client_socket.toString());
 
 					while (true) {
 
@@ -210,14 +219,20 @@ public class ChatService extends Service {
 
 						Log.i(TAG, "receive thread datainputstream" + dataInputStream);
 
-
 						String receiveData = dataInputStream.readUTF();
+
+						Log.i(TAG, "receiveData 받은 후 길이 -> " + receiveData.length());
+						Log.i(TAG, "receiveData 받은 후 내용 -> " + receiveData.toString());
+
+						if (receiveData.contains("sendMessage") && receiveData.contains("roomNum") && receiveData.contains("sendUser")) {
+							Log.i(TAG, "receiveData 구분자 포함 chatData() 시작");
+							chatData(receiveData);
+							Log.i(TAG, "receiveData 구분자 포함 chatData() 끝");
+						}
 
 
 						Log.i(TAG, "receiveThread 받은 데이터 : " + receiveData);
 
-						ChattingActivity.ChattingActivityUI chattingActivityUI = new ChattingActivity.ChattingActivityUI(receiveData);
-						chattingActivityUI.start();
 
 						Log.i(TAG, "receiveThread 받은 데이터 액티비티로 메시지 전달 끝!");
 
@@ -240,28 +255,17 @@ public class ChatService extends Service {
 
 		Log.i(TAG, "sendThread 실행!");
 
-//		for (int i = 0; i < userInfo.size(); i++) {
-//
-//			Log.i(TAG, i + "번째 userInfo : " + userInfo.get(i));
-//
-//		}
-
-
-		Log.i(TAG, "sendThread 클라이언트 소켓 정보 : " + client_socket.toString());
-
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
 
+					Log.i(TAG, "sendThread 클라이언트 소켓 정보 : " + client_socket.toString());
+
 					OutputStream outputStream = client_socket.getOutputStream();
 					DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
 
 					Log.i(TAG, "sendThread 채팅 서버에 보낼 문자열 : " + SendInfo);
-
-					// get(0) -> 초대된 유저 이름
-					// get(1) -> 초대된 유저 프로필 이미지
-					// get(2) -> 생성한 채팅방 고유 번호
 
 					dataOutputStream.writeUTF(SendInfo);
 
@@ -273,5 +277,27 @@ public class ChatService extends Service {
 		}).start();
 
 	} // sendThread() 끝
+
+
+	public void chatData(String receiveData) {
+
+		Log.i(TAG, "chatData 시작");
+
+		Log.i(TAG, "chatData messengerHashMap.get(RECEIVE_CHATTING) -> " + messengerHashMap.get(RECEIVE_CHATTING));
+		activityMessenger = messengerHashMap.get(RECEIVE_CHATTING);
+		Log.i(TAG, "chatData activityMessenger -> " + activityMessenger.toString());
+
+
+		try {
+			Message msg = Message.obtain(null, RECEIVE_CHATTING);
+			msg.replyTo = chatServiceMessenger;
+			Bundle bundle = new Bundle();
+			bundle.putString("UIData", receiveData);
+			msg.setData(bundle);
+			activityMessenger.send(msg);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
 
 } // ChatService class 끝

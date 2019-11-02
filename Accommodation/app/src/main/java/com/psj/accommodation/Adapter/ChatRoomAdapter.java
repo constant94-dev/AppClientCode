@@ -38,7 +38,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
 	public static class ViewHolder extends RecyclerView.ViewHolder {
 		// 사용될 항목들 선언
 		ImageView chatImageOne, chatImageTwo, chatImageThree, chatImageFour;
-		TextView chatNameAndCount, chatNowContent;
+		TextView chatNameAndCount, chatNowContent, chatNowRead;
 		LinearLayout chatLinear;
 
 		public View rootView;
@@ -52,6 +52,7 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
 			chatNameAndCount = v.findViewById(R.id.chatNameAndCount);
 			chatNowContent = v.findViewById(R.id.chatNowContent);
 			chatLinear = v.findViewById(R.id.chatLinear);
+			chatNowRead = v.findViewById(R.id.chatNowRead);
 
 			// 내가 선택한 아이템이 몇번째 인지 알아내기 위한 준비 작업
 
@@ -160,6 +161,9 @@ public class ChatRoomAdapter extends RecyclerView.Adapter<ChatRoomAdapter.ViewHo
 
 			viewHolder.chatNameAndCount.setText(chatData.get(position).getChatSearchName() + "  " + (name.length + 1));
 		}
+
+
+		viewHolder.chatNowContent.setText(chatData.get(position).getChatRoomContent());
 
 
 		// 어댑터에 데이터를 액티비티로 전달하기 위해서 설정한 태그 값

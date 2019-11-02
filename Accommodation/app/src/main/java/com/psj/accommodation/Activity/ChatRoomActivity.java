@@ -8,9 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.Parcelable;
@@ -79,7 +81,10 @@ public class ChatRoomActivity extends AppCompatActivity {
 	String profileEmail = "";
 	String profileName = "";
 	String profileImage = "";
-	String sendRoomNum = "";
+	String[] resultRoomNumSplit;
+	String[] resultSendUserSplit;
+	String[] resultSendMessageSplit;
+
 
 	Messenger serviceMessenger;
 	boolean isChatService = false; // 서비스 중인지 확인용 변수
@@ -104,12 +109,94 @@ public class ChatRoomActivity extends AppCompatActivity {
 				case SEND_THREAD:
 					Toast.makeText(ChatRoomActivity.this, "액티비티 자체에서 핸들러 전달 send", Toast.LENGTH_SHORT).show();
 					break;
+				case ChatService.RECEIVE_CHATTING:
+
+					serviceMessenger = msg.replyTo;
+					Log.i(TAG, "ChatRoomActivity -> " + msg.replyTo);
+					String UIData = msg.getData().getString("UIData");
+					Log.i(TAG, "서비스에서 채팅방 액티비티로 전달된 데이터 -> " + UIData);
+
+
+					int targetRoomNum = UIData.indexOf("roomNum");
+					String resultRoomNum = UIData.substring(targetRoomNum, (UIData.substring(targetRoomNum).indexOf("sendUser")));
+					int targetSendUser = UIData.indexOf("sendUser");
+					Log.i(TAG, "유저가 제대로 구분이 안되는 이유가 뭐지 ????????? " + UIData.indexOf("sendMessage"));
+					String resultSendUser = UIData.substring(targetSendUser, UIData.indexOf("sendMessage"));
+					int targetSendMessage = UIData.indexOf("sendMessage");
+					String resultSendMessage = UIData.substring(targetSendMessage);
+
+					Log.i(TAG, "Service 에서 채팅액티비티로 전달된 데이터 방번호 -> " + resultRoomNum);
+					Log.i(TAG, "Service 에서 채팅액티비티로 전달된 데이터 유저 -> " + resultSendUser);
+					Log.i(TAG, "Service 에서 채팅액티비티로 전달된 데이터 메시지 -> " + resultSendMessage);
+
+					resultRoomNumSplit = resultRoomNum.split(":");
+					resultSendUserSplit = resultSendUser.split(":");
+					resultSendMessageSplit = resultSendMessage.split(":");
+
+					Log.i(TAG, "가공된 방번호 - > " + resultRoomNumSplit[1]);
+					Log.i(TAG, "가공된 채팅 보낸 유저이름 - > " + resultSendUserSplit[1]);
+					Log.i(TAG, "가공된 메시지 - > " + resultSendMessageSplit[1]);
+
+
+					Log.i(TAG, "채팅방 목록 다시 갱신하는 로직 시작");
+					// 채팅서버에서 응답한 데이터중 메시지만 출력하면된다
+					// 메시지가 전달되면 데이터베이스 갱신하는 로직을 실행 시키고 가장 최근 메시지를 출력하자
+
+					Log.i(TAG, "1111111111111111111111");
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+
+							Log.i(TAG, "222222222222222222222");
+
+							Log.i(TAG, "채팅방 목록 갱신 스레드 시작");
+
+							showChatRoom();
+
+							Log.i(TAG, "33333333333333333333");
+
+							try {
+								Log.i(TAG, "채팅방 목록 갱신 스레드 쉬는중....");
+								Thread.sleep(1000);
+								Log.i(TAG, "채팅방 목록 갱신 스레드 다 쉼...");
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+
+
+						} // Thread run 끝
+
+
+					}).start(); // Thread 끝
+
+					Log.i(TAG, "44444444444444444444444");
+
+
+					for (int i = 0; i < chatRoomItemList.size(); i++) {
+						Log.i(TAG, "555555555555555555555555");
+						if (chatRoomItemList.get(i).getChatRoomNum().equals(resultRoomNumSplit[1])) {
+							Log.i(TAG, "666666666666666666666666");
+							Log.i(TAG, "채팅서버에서 전달된 방번호와 리스트에 저장된 방번호를 비교한다 -> " + chatRoomItemList.get(i).getChatRoomNum());
+
+							chatRoomItemList.get(i).setChatRoomContent(resultSendMessageSplit[1]);
+							chatAdapter.notifyItemChanged(i);
+							Log.i(TAG, "77777777777777777777777");
+						}
+						Log.i(TAG, "888888888888888888888888");
+					} // 반복문 끝
+
+
+					Log.i(TAG, "채팅방 목록 갱신 스레드 끝");
+
+
+					break;
 
 
 			}
 
 		}
 	} // ChatRoomActivityHandler 클래스 끝
+
 
 	// 핸들러 wrapping 한 메시지 객체
 	Messenger chatRoomActivityMessenger = new Messenger(new ChatRoomActivityHandler());
@@ -122,6 +209,17 @@ public class ChatRoomActivity extends AppCompatActivity {
 			Log.i(TAG, "onServiceConnected : 실행");
 
 			serviceMessenger = new Messenger(service);
+
+			try {
+
+				Message chatRoomActivity_msg = Message.obtain(null, ChatService.RECEIVE_CHATTING);
+				chatRoomActivity_msg.replyTo = chatRoomActivityMessenger;
+				Log.i(TAG, "채팅방 액티비티 메신저 주소 -> " + chatRoomActivityMessenger.toString());
+				serviceMessenger.send(chatRoomActivity_msg);
+
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
 
 		}
 
@@ -150,8 +248,17 @@ public class ChatRoomActivity extends AppCompatActivity {
 		// 사용자 본인의 프로필 정보 가져오기
 		getSelfProfile();
 
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		// 데이터베이스에 저장된 채팅방 정보 불러오기
 		showChatRoom();
+
+		// 바인드 서비스 시작
+		bindServiceStart();
 
 		chatRoomItemList = new ArrayList<>();
 
@@ -191,6 +298,7 @@ public class ChatRoomActivity extends AppCompatActivity {
 					chatRoomIntent.putExtra("chatRoomImage", image);
 					startActivity(chatRoomIntent);
 
+
 				}
 			}
 		}); // ChatRoomAdapter 생성자 끝
@@ -199,6 +307,21 @@ public class ChatRoomActivity extends AppCompatActivity {
 
 
 	} // onCreate 끝
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+
+		Log.i(TAG, "onStart : 실행");
+		// 데이터베이스에 저장된 채팅방 정보 불러오기
+		//showChatRoom();
+		// 바인드 서비스 시작
+		//bindServiceStart();
+
+
+
+
+	}
 
 	@Override
 	protected void onResume() {
@@ -283,6 +406,7 @@ public class ChatRoomActivity extends AppCompatActivity {
 		String TAG_NAMES = "names";
 		String TAG_IMAGES = "images";
 		String TAG_CREATOR = "creator";
+		String TAG_LASTMESSAGE = "lastmessage";
 
 
 		try {
@@ -302,6 +426,7 @@ public class ChatRoomActivity extends AppCompatActivity {
 				String chatRoomNames = item.getString(TAG_NAMES);
 				String chatRoomImages = item.getString(TAG_IMAGES);
 				String chatRoomCreator = item.getString(TAG_CREATOR);
+				String chatRoomLastmessage = item.getString(TAG_LASTMESSAGE);
 
 				Log.i(TAG, "채팅방 고유 번호 : " + chatRoomNum);
 				Log.i(TAG, "채팅방 참여자들 : " + chatRoomNames);
@@ -319,7 +444,7 @@ public class ChatRoomActivity extends AppCompatActivity {
 
 				if (chatRoomImages.contains(profileImage)) {
 					chatRoomImages = chatRoomImages.replace(profileImage, "");
-					chatRoomImages = chatRoomImages.trim();
+					chatRoomImages = chatRoomImages.trim().replace("  ", " ");
 					Log.i(TAG, "나의 이미지를 지워버렸다 -> " + chatRoomImages);
 
 				}
@@ -327,7 +452,7 @@ public class ChatRoomActivity extends AppCompatActivity {
 				Log.i(TAG, "어댑터에 데이터 추가 하기전 확인하는 이름들 -> " + chatRoomNames);
 				Log.i(TAG, "어댑터에 데이터 추가 하기전 확인하는 이미지들 -> " + chatRoomImages);
 				// 어댑터에 전달할 데이터 추가
-				chatRoomItemList.add(new ChatSearchItem(chatRoomNum, chatRoomNames, chatRoomImages));
+				chatRoomItemList.add(new ChatSearchItem(chatRoomNum, chatRoomNames, chatRoomImages, chatRoomLastmessage));
 
 				// 어댑터에게 새로 삽입된 아이템이 있다는걸 알려준다
 				chatAdapter.notifyItemInserted(0);
@@ -335,14 +460,13 @@ public class ChatRoomActivity extends AppCompatActivity {
 
 			} // 반복문을 이용하여 Json 풀어주기 끝
 
-			// 바인드 서비스 시작
-			bindServiceStart();
-
 
 		} catch (JSONException e) {
 
 			Log.d(TAG, "showChatResult : ", e);
 		}
+
+		Log.i(TAG, "채팅방 목록 데이터베이스에서 가져온 데이터 세팅 끝");
 
 	} // showChatResult() 끝
 
@@ -421,6 +545,8 @@ public class ChatRoomActivity extends AppCompatActivity {
 	} // selfProfileResult() 끝
 
 	public void bindServiceStart() {
+
+		Log.i(TAG, "바인드 서비스 시작");
 		Intent bindIntent = new Intent(ChatRoomActivity.this, ChatService.class); // 다음넘어갈 컴포넌트 정의
 		isChatService = bindService(bindIntent, serviceConn, Context.BIND_AUTO_CREATE); // 인텐트,서비스연결객체,플래그 전달 -->서비스 연결
 	}

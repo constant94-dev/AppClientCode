@@ -12,6 +12,7 @@ public class ChatSearchItem implements Serializable {
 	private String chatSearchName;
 	private String chatRoomContent;
 	private String chatRoomNum;
+	private int chatNowRead;
 
 
 	public ChatSearchItem() {
@@ -22,10 +23,11 @@ public class ChatSearchItem implements Serializable {
 		this.chatRoomContent = chatRoomContent;
 	}
 
-	public ChatSearchItem(String chatRoomNum, String chatSearchName, String chatSearchImage) {
+	public ChatSearchItem(String chatRoomNum, String chatSearchName, String chatSearchImage, String chatRoomContent) {
 		this.chatRoomNum = chatRoomNum;
 		this.chatSearchName = chatSearchName;
 		this.chatSearchImage = chatSearchImage;
+		this.chatRoomContent = chatRoomContent;
 
 	}
 
@@ -34,6 +36,14 @@ public class ChatSearchItem implements Serializable {
 		this.chatSearchName = chatSearchName;
 		this.chatSearchImage = chatSearchImage;
 
+	}
+
+	public int getChatNowRead() {
+		return chatNowRead;
+	}
+
+	public void setChatNowRead(int chatNowRead) {
+		this.chatNowRead = chatNowRead;
 	}
 
 	public String getChatRoomNum() {

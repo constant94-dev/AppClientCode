@@ -79,45 +79,26 @@ public class ChattingAdapter extends RecyclerView.Adapter<ChattingAdapter.ViewHo
 	@Override
 	public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
 
-		String nameCheck = chattingData.get(position).getChatName();
-		String contentCheck = chattingData.get(position).getChatContent();
 
+		if (chattingData.get(position).getChatSelf().equals(chattingData.get(position).getChatName())) {
+			Log.i(TAG, "채팅 보낸사람과 받는사람에 이름이 같아!");
 
-		if (chattingData.get(position).getChatName().startsWith("name")) {
+			LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) viewHolder.LinearItemBody.getLayoutParams();
 
-			Log.i(TAG, "어댑터 세팅 데이터 이름 : " + nameCheck.toString());
-			viewHolder.LinearItemAccess.setVisibility(View.VISIBLE);
-
-			String[] nameSplit = chattingData.get(position).getChatName().split(" ");
-
-			viewHolder.chatAccessUser.setText(nameSplit[1] + "님 입장하였습니다");
-
-		} else if (chattingData.get(position).getChatAccess().startsWith("message")) {
-
-			Log.i(TAG, "어댑터 세팅 데이터 이름 : " + nameCheck.toString());
-			Log.i(TAG, "어댑터 세팅 데이터 내용 : " + contentCheck.toString());
-			Log.i(TAG, "어댑터 세팅 데이터 self : " + chattingData.get(position).getChatSelf());
-			viewHolder.LinearItemAccess.setVisibility(View.GONE);
-			viewHolder.LinearItemBody.setVisibility(View.VISIBLE);
-
-			if (chattingData.get(position).getChatSelf() == 1) {
-				LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) viewHolder.LinearItemBody.getLayoutParams();
-
-				layoutParams.gravity = Gravity.RIGHT;
-
-				viewHolder.LinearItemBody.setLayoutParams(layoutParams);
-			}
-
-
-			String[] nameSplit = chattingData.get(position).getChatName().split(":");
-
-
-			viewHolder.chattingUser.setText(nameSplit[0]);
-			viewHolder.chattingContent.setText(chattingData.get(position).getChatContent());
+			layoutParams.gravity = Gravity.RIGHT;
+			viewHolder.LinearItemBody.setLayoutParams(layoutParams);
 
 		} else {
-			viewHolder.LinearItemAccess.setVisibility(View.GONE);
+			Log.i(TAG, "채팅 보낸사람과 받는사람에 이름이 달라!");
+			LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) viewHolder.LinearItemBody.getLayoutParams();
+
+			layoutParams.gravity = Gravity.LEFT;
+			viewHolder.LinearItemBody.setLayoutParams(layoutParams);
 		}
+
+		viewHolder.chattingUser.setText(chattingData.get(position).getChatName());
+		viewHolder.chattingContent.setText(chattingData.get(position).getChatContent());
+		Glide.with(chattingContext).load(ServerImagePath + chattingData.get(position).getChatImage()).centerCrop().into(viewHolder.chattingImage);
 	}
 
 	// 리사이클러뷰 보여줄 행 개수 리턴

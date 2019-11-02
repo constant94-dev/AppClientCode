@@ -87,11 +87,17 @@ public interface ApiService {
 	@GET("/chatRoomInsert.php")
 	Call<String> chatRoomInsert(@Query("names") String names, @Query("images") String images, @Query("creator") String creator);
 
+	@GET("/chatRoomUpdate.php")
+	Call<String> chatRoomUpdate(@Query("chatRoomNum") String chatRoomNum, @Query("lastMessage") String lastMessage);
+
 	@GET("/chatRoomList.php")
 	Call<JsonObject> chatRoomList(@Query("creator") String creator);
 
 	@GET("/chattingGetProfile.php")
 	Call<JsonObject> chattingGetProfile(@Query("chattingEmail") String chattingEmail);
+
+	@GET("/sendUserGetImage.php")
+	Call<String> sendUserGetImage(@Query("sendName") String sendName);
 
 	// @Multipart -> 요청 본문이 여러 부분이 있다 @Part 주석을 달아야한다
 	// @Part -> Multipart 요청의 단일 부분을 나타낸다

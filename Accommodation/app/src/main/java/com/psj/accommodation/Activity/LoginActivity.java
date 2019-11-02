@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
 			switch (msg.what) {
 				case ChatService.SET_SOCKET:
 					serviceMessenger = msg.replyTo;
-					Toast.makeText(LoginActivity.this, "서비스에서 소켓 접속 응답 받음", Toast.LENGTH_SHORT).show();
+					//Toast.makeText(LoginActivity.this, "서비스에서 소켓 접속 응답 받음", Toast.LENGTH_SHORT).show();
 					break;
 
 			}
@@ -316,21 +316,25 @@ public class LoginActivity extends AppCompatActivity {
 		super.onStop();
 
 
-		try {
+		if (serviceMessenger == null) {
+			Log.i(TAG, "소켓접속 하자..");
+		} else {
+			try {
 
-			Message r_msg = Message.obtain(null, ChatService.RECEIVE_THREAD);
-			r_msg.replyTo = loginActivityMessenger;
-			serviceMessenger.send(r_msg);
+				Message r_msg = Message.obtain(null, ChatService.RECEIVE_THREAD);
+				r_msg.replyTo = loginActivityMessenger;
+				serviceMessenger.send(r_msg);
 
-			Message s_msg = Message.obtain(null, ChatService.SEND_THREAD);
-			s_msg.replyTo = loginActivityMessenger;
-			Bundle bundle = new Bundle();
-			bundle.putString("sendInfo", "LoginName:"+loginName);
-			s_msg.setData(bundle);
-			serviceMessenger.send(s_msg);
+				Message s_msg = Message.obtain(null, ChatService.SEND_THREAD);
+				s_msg.replyTo = loginActivityMessenger;
+				Bundle bundle = new Bundle();
+				bundle.putString("sendInfo", "LoginName:" + loginName);
+				s_msg.setData(bundle);
+				serviceMessenger.send(s_msg);
 
-		} catch (RemoteException e) {
-			e.printStackTrace();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
 		}
 
 
@@ -354,7 +358,12 @@ public class LoginActivity extends AppCompatActivity {
 			isChatService = false;
 		}
 
-		alertDialog.dismiss();
+		if (alertDialog == null) {
+			Log.i(TAG, "다이얼로그 종료 할게 없어요..");
+		} else {
+			alertDialog.dismiss();
+		}
+
 
 	} // onDestroy() 끝
 

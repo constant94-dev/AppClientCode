@@ -58,9 +58,12 @@ import retrofit2.Response;
 public class ChattingActivity extends AppCompatActivity {
 
 	public static final String TAG = "ChattingActivity";
+	//public static final int RECEIVE_CHATTING = 100;
 
-	ImageView chatRoomMore, chatElement, chatSend;
+	ImageView chatRoomMore, chatElement, chatSend, chatRoomBack;
 	EditText chatContent;
+
+	public static Context chattingContext;
 
 	// 서버 접속 여부를 판별하기 위한 변수
 	boolean isConnect = false;
@@ -88,6 +91,7 @@ public class ChattingActivity extends AppCompatActivity {
 	// AWS 서버 IP 주소
 	String serverPath = "54.180.152.167";
 
+	private ChatService chatService;
 	Messenger serviceMessenger;
 	boolean isChatService = false; // 서비스 중인지 확인용 변수
 
@@ -104,6 +108,42 @@ public class ChattingActivity extends AppCompatActivity {
 				case ChatService.RECEIVE_THREAD:
 					serviceMessenger = msg.replyTo;
 					Toast.makeText(ChattingActivity.this, "서비스에서 리시브 스레드 응답 받음", Toast.LENGTH_SHORT).show();
+					break;
+				case ChatService.RECEIVE_CHATTING:
+					serviceMessenger = msg.replyTo;
+					Log.i(TAG, "ChattingActivity -> " + msg.replyTo);
+					String UIData = msg.getData().getString("UIData");
+					Log.i(TAG, "서비스에서 채팅 액티비티로 전달된 데이터 -> " + UIData);
+
+					int targetRoomNum = UIData.indexOf("roomNum");
+					String resultRoomNum = UIData.substring(targetRoomNum, (UIData.substring(targetRoomNum).indexOf("sendUser")));
+					int targetSendUser = UIData.indexOf("sendUser");
+					Log.i(TAG, "유저가 제대로 구분이 안되는 이유가 뭐지 ????????? " + UIData.indexOf("sendMessage"));
+					String resultSendUser = UIData.substring(targetSendUser, UIData.indexOf("sendMessage"));
+					int targetSendMessage = UIData.indexOf("sendMessage");
+					String resultSendMessage = UIData.substring(targetSendMessage);
+
+					Log.i(TAG, "Service 에서 채팅액티비티로 전달된 데이터 방번호 -> " + resultRoomNum);
+					Log.i(TAG, "Service 에서 채팅액티비티로 전달된 데이터 유저 -> " + resultSendUser);
+					Log.i(TAG, "Service 에서 채팅액티비티로 전달된 데이터 메시지 -> " + resultSendMessage);
+
+					String[] resultRoomNumSplit = resultRoomNum.split(":");
+					String[] resultSendUserSplit = resultSendUser.split(":");
+					String[] resultSendMessageSplit = resultSendMessage.split(":");
+
+					Log.i(TAG, "가공된 방번호 - > " + resultRoomNumSplit[1]);
+					Log.i(TAG, "가공된 채팅 보낸 유저이름 - > " + resultSendUserSplit[1]);
+					Log.i(TAG, "가공된 메시지 - > " + resultSendMessageSplit[1]);
+
+					// 채팅서버에서 응답한 데이터를 Service 클래스에서 확인 후 UI 세팅을 해주고 싶은 액티비티로 데이터를 핸들러로 전달했다
+					// 핸들러로 전달받은 채팅보낸 유저이름을 데이터베이스에 저장된 프로필정보를 가져와 리사이클러뷰에 세팅한다
+					if (chatRoomNum.equals(resultRoomNumSplit[1])) {
+						UISetting(resultRoomNumSplit[1], resultSendUserSplit[1], resultSendMessageSplit[1]);
+					} else {
+						Log.i(TAG, "채팅서버에서 응답한 방번호가 다릅니다!");
+					}
+
+
 					break;
 
 			}
@@ -122,6 +162,18 @@ public class ChattingActivity extends AppCompatActivity {
 			Log.i(TAG, "onServiceConnected : 실행");
 
 			serviceMessenger = new Messenger(service);
+
+			try {
+
+				Message chattingActivity_msg = Message.obtain(null, ChatService.RECEIVE_CHATTING);
+				chattingActivity_msg.replyTo = chattingActivityMessenger;
+				Log.i(TAG, "채팅 액티비티 메신저 주소 -> " + chattingActivityMessenger.toString());
+				serviceMessenger.send(chattingActivity_msg);
+
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
 
 		}
 
@@ -145,6 +197,7 @@ public class ChattingActivity extends AppCompatActivity {
 		chatElement = findViewById(R.id.chatElement);
 		chatSend = findViewById(R.id.chatSend);
 		chatContent = findViewById(R.id.chatContent);
+		chatRoomBack = findViewById(R.id.chatRoomBack);
 		chattingRecyclerView = findViewById(R.id.chatRoom_recycler_view);
 
 
@@ -212,194 +265,27 @@ public class ChattingActivity extends AppCompatActivity {
 					s_msg.setData(bundle);
 					serviceMessenger.send(s_msg);
 
+					LastMessage(chatRoomNum, chatContent.getText().toString());
+
+					chatContent.setText("");
+
 				} catch (RemoteException e) {
 					e.printStackTrace();
 				}
 			}
 		});
 
+		chatRoomBack.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent chatRoomIntent = new Intent(ChattingActivity.this, ChatRoomActivity.class);
+				startActivity(chatRoomIntent);
+				finish();
+			}
+		});
+
 
 	} // onResume 끝
-
-	public void init() {
-		// 접속 후
-
-		// 입력한 문자열을 가져온다.
-		String msg = chatContent.getText().toString();
-		// 송신 스레드 가동
-		SendToServerThread thread = new SendToServerThread(client_socket, msg);
-		thread.start();
-
-	}
-
-	// 서버접속 처리하는 스레드 클래스 - 안드로이드에서 네트워크 관련 동작은 항상
-	// 메인스레드가 아닌 스레드에서 처리해야 한다.
-	class ConnectionThread extends Thread {
-
-		@Override
-		public void run() {
-			try {
-
-				Log.i(TAG, "ConnectionThread 실행");
-
-				// 접속한다.
-				final Socket socket = new Socket("54.180.152.167", 8888);
-				client_socket = socket;
-				// 사용자 이름과 프로필 이미지
-				String nameANDimage = chatRoomNum + ":" + sessionName + ":";
-
-				// 스트림을 추출
-				OutputStream os = socket.getOutputStream();
-				DataOutputStream dos = new DataOutputStream(os);
-				// 사용자 이름과 프로필 이미지를 서버에 전송한다
-				dos.writeUTF(nameANDimage);
-
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-
-						// 접속 상태를 true로 셋팅한다.
-						isConnect = true;
-						// 메세지 수신을 위한 스레드 가동
-						isRunning = true;
-						MessageThread thread = new MessageThread(socket);
-						thread.start();
-					}
-				});
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	} // ConnectionThread class 끝
-
-
-	class MessageThread extends Thread {
-		Socket socket;
-		DataInputStream dis;
-
-		public MessageThread(Socket socket) {
-			try {
-
-				Log.i(TAG, "MessageThread 실행");
-
-				this.socket = socket;
-				InputStream is = socket.getInputStream();
-				dis = new DataInputStream(is);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		@Override
-		public void run() {
-			try {
-				while (isRunning) {
-					// 서버로부터 데이터를 수신받는다.
-					final String msg = dis.readUTF();
-					// 화면에 출력
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-
-							Log.i(TAG, "서버로부터 받아온 데이터 : " + msg);
-
-
-							if (msg.startsWith("name")) {
-
-								Log.i(TAG, "메시지 시작 name");
-
-								//String[] msgSplit = msg.split(" ");
-
-								//Log.i(TAG, "메시지 어댑터에 전달 : " + msgSplit[1]);
-
-								chattingItemList.add(0, new ChattingItem(msg));
-								chattingAdapter.notifyItemInserted(0);
-
-
-							} else if (msg.startsWith("message")) {
-
-								String[] msgSplit = msg.split(":");
-
-								Log.i(TAG, "세션 이름 : " + sessionName);
-								Log.i(TAG, "분할한 이름 : " + msgSplit[1]);
-
-								if (msgSplit[1].equals(sessionName)) {
-									chattingItemList.add(0, new ChattingItem("num", msgSplit[0], msgSplit[1], "image", msgSplit[2], 1));
-									chattingAdapter.notifyItemInserted(0);
-								} else {
-									chattingItemList.add(0, new ChattingItem("num", msgSplit[0], msgSplit[1], "image", msgSplit[2], 0));
-									chattingAdapter.notifyItemInserted(0);
-								}
-
-
-							}
-
-						}
-					});
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	} // MessageThread class 끝
-
-	// 서버에 데이터를 전달하는 스레드
-	class SendToServerThread extends Thread {
-		Socket socket;
-		String msg;
-		DataOutputStream dos;
-
-		public SendToServerThread(Socket socket, String msg) {
-
-			Log.i(TAG, "SendToServerThread 실행");
-
-			try {
-				this.socket = socket;
-				this.msg = msg;
-				OutputStream os = socket.getOutputStream();
-				dos = new DataOutputStream(os);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		@Override
-		public void run() {
-			try {
-				// 서버로 데이터를 보낸다.
-				dos.writeUTF(msg);
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						chatContent.setText("");
-					}
-				});
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	} // SendToServerThread class 끝
-
-	public static class ChattingActivityUI extends Thread {
-
-		String content;
-
-		public ChattingActivityUI(String content) {
-			this.content = content;
-		}
-
-		@Override
-		public void run() {
-			super.run();
-
-			Log.i(TAG, "UI 출력 내용 -> " + content);
-			// 리사이클러뷰에 적용시킨다
-
-		}
-
-	}
 
 
 	@Override
@@ -420,6 +306,70 @@ public class ChattingActivity extends AppCompatActivity {
 			isChatService = false;
 		}
 	}
+
+	public void LastMessage(String chatRoomNum, String lastMessage) {
+		// 레트로핏 서버 URL 설정해놓은 객체 생성
+		RetroClient retroClient = new RetroClient();
+		// GET, POST 같은 서버에 데이터를 보내기 위해서 생성합니다
+		ApiService apiService = retroClient.getApiClient().create(ApiService.class);
+
+		Log.i(TAG, "마지막 메시지 저장할 방 번호 -> " + chatRoomNum);
+		Log.i(TAG, "마지막 메시지 -> " + lastMessage);
+
+		// 인터페이스 ApiService에 선언한 chatRoomList()를 호출합니다
+		Call<String> call = apiService.chatRoomUpdate(chatRoomNum, lastMessage);
+
+		call.enqueue(new Callback<String>() {
+			@Override
+			public void onResponse(Call<String> call, Response<String> response) {
+				Log.i(TAG, "onResponse : 실행 -> " + response.body().toString());
+			}
+
+			@Override
+			public void onFailure(Call<String> call, Throwable throwable) {
+				Log.i(TAG, "onFailure : 실행 -> " + throwable);
+				Toast.makeText(ChattingActivity.this, "onFailure / " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		});
+	}
+
+	public void UISetting(final String roomNum, final String sendUser, final String sendMessage) {
+		// 레트로핏 서버 URL 설정해놓은 객체 생성
+		RetroClient retroClient = new RetroClient();
+		// GET, POST 같은 서버에 데이터를 보내기 위해서 생성합니다
+		ApiService apiService = retroClient.getApiClient().create(ApiService.class);
+
+		// 인터페이스 ApiService에 선언한 chatRoomList()를 호출합니다
+		Call<String> call = apiService.sendUserGetImage(sendUser);
+
+		call.enqueue(new Callback<String>() {
+			@Override
+			public void onResponse(Call<String> call, Response<String> response) {
+				Log.i(TAG, "onResponse : 실행 -> " + response.body().toString());
+
+				String sendUserImage = response.body().toString();
+
+				Log.i(TAG, "리사이클러뷰 세팅 시작.....");
+
+				chattingItemList.add(0, new ChattingItem(roomNum, sendUser, sendUserImage, sendMessage, sessionName));
+
+				chattingAdapter.notifyItemInserted(0);
+
+				Log.i(TAG, "리사이클러뷰 세팅 끝.....");
+
+			}
+
+			@Override
+			public void onFailure(Call<String> call, Throwable throwable) {
+				Log.i(TAG, "onFailure : 실행 -> " + throwable);
+				Toast.makeText(ChattingActivity.this, "onFailure / " + throwable.getMessage(), Toast.LENGTH_LONG).show();
+			}
+
+		});
+
+
+	}
+
 
 	// 쉐어드에 저장된 사용자 이름/이메일 가져오기 기능 (세션 활용)
 	public void getShard() {
