@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">welfare</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_tools">Tools</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_send">Send</string>
+
+    <string name="login_naver">네이버로 로그인하기</string>
+    <string name="login_kakao">카카오로 로그인하기</string>
+    <string name="login_google">구글로 로그인하기</string>
+    <string name="login_welfare">니모 로그인하기</string>
+    <string name="kakao_app_key">31c0f2ba3ef4af192159238f11e4d1cd</string>
+    <string name="login_shared">com.psj.welfare.snsLogin</string>
+</resources>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/m_ScrollView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorMainWhite">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="30dp">
+
+        <ImageView
+            android:id="@+id/back_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:src="@drawable/arrow_left" />
+
+        <ImageView
+            android:id="@+id/detail_img"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/detail_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/nanum_barun_gothic_bold"
+            android:padding="20dp"
+            android:text="혜택 타이틀"
+            android:textColor="@color/colorBlack"
+            android:textSize="30sp" />
+
+        <LinearLayout
+            android:id="@+id/divide_line_one"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/colorGray_L"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/nanum_barun_gothic_bold"
+            android:text="대상"
+            android:textColor="@color/colorBlack"
+            android:textSize="20sp" />
+
+        <com.borjabravo.readmoretextview.ReadMoreTextView
+            android:id="@+id/detail_target"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/nanum_barun_gothic_bold"
+            android:lineSpacingExtra="15dp"
+            android:textColor="@color/colorBlack"
+            android:textSize="24sp"
+            app:colorClickableText="@color/colorMainBlue"
+            app:showTrimExpandedText="true"
+            app:trimCollapsedText="..간략히"
+            app:trimExpandedText="..더보기"
+            app:trimLength="30"
+            app:trimMode="trimModeLength" />
+
+        <LinearLayout
+            android:id="@+id/divide_line_two"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/colorGray_L"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/nanum_barun_gothic_bold"
+            android:text="내용"
+            android:textColor="@color/colorBlack"
+            android:textSize="20sp" />
+
+        <com.borjabravo.readmoretextview.ReadMoreTextView
+            android:id="@+id/detail_contents"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/nanum_barun_gothic_bold"
+            android:lineSpacingExtra="15dp"
+            android:textColor="@color/colorBlack"
+            android:textSize="24sp"
+            app:colorClickableText="@color/colorMainBlue"
+            app:showTrimExpandedText="true"
+            app:trimCollapsedText="..간략히"
+            app:trimExpandedText="..더보기"
+            app:trimLength="30"
+            app:trimMode="trimModeLength" />
+
+        <LinearLayout
+            android:id="@+id/divide_line_three"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/colorGray_L"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/nanum_barun_gothic_bold"
+            android:text="신청 기한"
+            android:textColor="@color/colorBlack"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/detail_period"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/nanum_barun_gothic_bold"
+            android:text="2020"
+            android:textColor="@color/colorBlack"
+            android:textSize="24sp" />
+
+        <LinearLayout
+            android:id="@+id/divide_line_four"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/colorGray_L"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/nanum_barun_gothic_bold"
+            android:text="문의"
+            android:textColor="@color/colorBlack"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/detail_contact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/nanum_barun_gothic_bold"
+            android:text="문의 내용"
+            android:textColor="@color/colorBlack"
+            android:textSize="24sp" />
+
+    </LinearLayout>
+
+</ScrollView>

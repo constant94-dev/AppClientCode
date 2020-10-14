@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+    <color name="colorMainBlue">#54A4FF</color>
+    <color name="colorMainWhite">#FFFFFF</color>
+    <color name="colorBlack">#000000</color>
+    <color name="colorNaverBtn">#1EC800</color>
+    <color name="colorKakaoBtn">#FEE500</color>
+    <color name="colorGoogleBtn">#FFFFFF</color>
+    <color name="colorGray_L">#e6e6e6</color>
+    <color name="colorGray_B">#bdbdbd</color>
+    <color name="colorRed">#ff0d00</color>
+
+
+</resources>
